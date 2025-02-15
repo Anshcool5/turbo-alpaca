@@ -11,3 +11,4 @@ venv/
 db.sqlite3  # Ignore SQLite database (if using SQLite)
 instance/
 media/  
+.DS_STORE
