@@ -12,3 +12,7 @@ venv/
 instance/
 media/  
 .DS_STORE
+
+# Sample data
+sample_data/
+data_for_chroma/
