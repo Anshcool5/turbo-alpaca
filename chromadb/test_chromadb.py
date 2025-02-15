@@ -1,11 +1,10 @@
-from chromadb.config import Settings
 import chromadb
 
 # Create a new Chroma client with the latest API
-client = chromadb.Client(Settings(chroma_db_impl="duckdb+parquet", persist_directory="db"))
+chroma_client = chromadb.Client()
 
 # Recreate your collection
-collection = client.get_or_create_collection(name="BusinessCollection")
+collection = chroma_client.create_collection(name="my_collection")
 
 # Add your data manually
 collection.add(
