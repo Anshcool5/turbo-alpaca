@@ -5,9 +5,10 @@ __pycache__/
 
 # Virtual environment (venv)
 venv/
-.env/
+.env
 
 # Django-specific
 upload/db.sqlite3  # Ignore SQLite database (if using SQLite)
 instance/
 media/  
+.DS_STORE
