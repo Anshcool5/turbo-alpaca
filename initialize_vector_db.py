@@ -2,6 +2,7 @@ from langchain_community.vectorstores import Chroma
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.document_loaders import TextLoader
 from langchain_community.embeddings import HuggingFaceEmbeddings
+from langchain_community.document_loaders import JSONLoader
 import chromadb
 from chromadb.api import Embeddings
 
@@ -31,6 +32,13 @@ loaded_documents = loader.load()
 text_splitter = RecursiveCharacterTextSplitter(chunk_size=6144, chunk_overlap=128)
 documents = text_splitter.split_documents(loaded_documents)
 print(f"Number of documents: {len(documents)}")
+
+loader = JSONLoader(
+    file_path='./course_info_SC.json',
+    jq_schema=".CMPUT[]",
+    text_content=False)
+
+data = loader.load()
 
 # Initialize Chroma client
 client = chromadb.Client()
