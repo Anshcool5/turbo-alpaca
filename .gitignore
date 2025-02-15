@@ -8,7 +8,7 @@ venv/
 .env
 
 # Django-specific
-db.sqlite3  # Ignore SQLite database (if using SQLite)
+*db.sqlite3  # Ignore SQLite database (if using SQLite)
 instance/
 media/  
 .DS_STORE
