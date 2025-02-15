@@ -1,0 +1,13 @@
+# Python bytecode files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environment (venv)
+venv/
+.env/
+
+# Django-specific
+upload/db.sqlite3  # Ignore SQLite database (if using SQLite)
+instance/
+media/  
