@@ -7,4 +7,4 @@ Anshul Verma \
 Siddharth Dileep \
 Pranav Gupta \
 Ishaan Meena \
-Melrita Cyriac \
+Melrita Cyriac
