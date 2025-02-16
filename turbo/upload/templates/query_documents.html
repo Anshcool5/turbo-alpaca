@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Query Documents</title>
+</head>
+<body>
+    <h2>Search for Documents</h2>
+    <form method="POST">
+        {% csrf_token %}
+        <input type="text" name="query" placeholder="Enter your search query">
+        <button type="submit">Search</button>
+    </form>
+
+    {% if results %}
+        <h3>Search Results:</h3>
+        <ul>
+            {% for result in results %}
+                <li>Match Score: {{ result.score }} - <strong>{{ result.text }}</strong></li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+</body>
+</html>
