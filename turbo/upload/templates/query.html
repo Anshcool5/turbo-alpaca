@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Query</title>
+</head>
+<body>
+    <h1>Query Documents</h1>
+    <form method="post">
+        {% csrf_token %}
+        <input type="text" name="query" placeholder="Enter your query" required>
+        <button type="submit">Search</button>
+    </form>
+    <div id="results"></div>
+    <script>
+        document.querySelector("form").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const response = await fetch("{% url 'query' %}", {
+                method: "POST",
+                body: formData,
+                headers: {
+                    "X-CSRFToken": "{{ csrf_token }}"
+                }
+            });
+            const data = await response.json();
+            const resultsDiv = document.getElementById("results");
+            resultsDiv.innerHTML = "";
+            if (data.results) {
+                data.results.forEach(result => {
+                    resultsDiv.innerHTML += `<p>Score: ${result.score}, Source: ${result.text}</p>`;
+                });
+            } else if (data.error) {
+                resultsDiv.innerHTML = `<p style="color: red;">${data.error}</p>`;
+            }
+        });
+    </script>
+    <a href="{% url 'home' %}">Back to Home</a>
+</body>
+</html>
