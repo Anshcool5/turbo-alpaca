@@ -11,14 +11,17 @@ from django.contrib import messages
 from django.contrib.auth import login, authenticate, logout
 from dotenv import load_dotenv
 from langchain.schema import Document
-from langchain.llms import Ollama  # Use LangChain's Ollama LLM integration
+# from langchain.llms import Ollama  # Use LangChain's Ollama LLM integration
+from transformers import pipeline
 
+# Replace Ollama with Hugging Face LLM
+llm = pipeline("text-generation", model="gpt2")
 
 # Load environment variables from .env file
 load_dotenv()
 
 # Initialize the Ollama LLM (Llama 3.2 model)
-llm = Ollama(model="llama3")
+# llm = Ollama(model="llama3")
 
 # Initialize Pinecone
 PINECONE_API_KEY = os.getenv("PINECONE_API_KEY")
@@ -140,41 +143,32 @@ def user_logout(request):
     logout(request)
     return redirect("login")  # Redirect to the login page
 
+
+
 def query_pinecone(request):
     if request.method == "POST":
         query_text = request.POST.get("query")
+        
         if not query_text:
             return JsonResponse({"error": "Query text is required"}, status=400)
 
         # Convert query to an embedding
-        query_embedding = embedding_model.embed_query(query_text)
+        query_embedding = embedding_model.embed_query(query_text)  # Shape: (384,)
 
         # Search in Pinecone
         search_results = index.query(vector=query_embedding, top_k=5, include_metadata=True)
 
-        # Extract full document content from metadata
-        retrieved_docs = [
-            match["metadata"].get("content", "No content available")
-            for match in search_results["matches"]
-        ]
+        # Extract matching documents
+        matches = []
+        if "matches" in search_results:
+            matches = [
+                {
+                    "score": match["score"],
+                    "text": match["metadata"].get("source", "No source available")  # Avoid KeyError
+                }
+                for match in search_results["matches"]
+            ]
 
-        # Combine retrieved file contents into a context string
-        context = "\n\n".join(retrieved_docs)
-
-        # Create a contextualized prompt for Llama 3.2
-        prompt = f"""Use the following document contents to answer the question:
-        {context}
-        
-        Question: {query_text}
-        Answer:"""
-
-        # Get response from the Llama model
-        response = llm(prompt)
-
-        return JsonResponse({
-            "query": query_text,
-            "context": retrieved_docs,
-            "answer": response
-        })
+        return render(request, "query.html", {"results": matches})
 
     return render(request, "query.html")

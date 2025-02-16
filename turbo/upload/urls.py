@@ -12,4 +12,5 @@ urlpatterns = [
     path('login/', views.user_login, name='login'),  # User login
     path('logout/', views.user_logout, name='logout'),  # User logoutx
     path('query/', views.query_pinecone, name='query')
+    
 ]
