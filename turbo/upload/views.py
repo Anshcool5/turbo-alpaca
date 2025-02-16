@@ -13,7 +13,7 @@ from langchain.schema import Document
 
 
 # Initialize Pinecone
-PINECONE_API_KEY= "pcsk_6T1LP3_5ti2A1A7ENu28thNExmhvxzNiB351xPNmnsgtJZDiHKjLUWyPwjYGAo4B6QMLCN"
+PINECONE_API_KEY= ""
 
 PINECONE_ENVIRONMENT = "us-east-1"  # Example: "us-west1-gcp-free"
 
