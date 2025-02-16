@@ -121,8 +121,8 @@ def user_login(request):
             return redirect("home")  # Redirect to the home page
         else:
             # Return an error message
-            return render(request, "login.html", {"error": "Invalid username or password"})
-    return render(request, "login.html")
+            return render(request, 'login.html', {'error': 'Invalid username or password'})
+    return render(request, 'login.html')
 
 # User logout view
 def user_logout(request):
