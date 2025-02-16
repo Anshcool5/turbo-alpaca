@@ -1,17 +1,45 @@
-from django.shortcuts import render
-from django.http import HttpResponse, JsonResponse
-
+from django.shortcuts import render, redirect
+from django.http import JsonResponse, HttpResponse
 from PyPDF2 import PdfReader
 from langchain.text_splitter import CharacterTextSplitter
-from sentence_transformers import SentenceTransformer
-import json
-
+from langchain.embeddings import HuggingFaceEmbeddings
+from langchain.vectorstores import Pinecone as PineconeVectorStore
+from pinecone import Pinecone, ServerlessSpec
+import os
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import login, authenticate, logout
 
-# Load the Hugging Face embedding model (You can choose a different model from Hugging Face)
-embedding_model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
+from langchain.schema import Document
 
+
+# Initialize Pinecone
+PINECONE_API_KEY= "pcsk_6T1LP3_5ti2A1A7ENu28thNExmhvxzNiB351xPNmnsgtJZDiHKjLUWyPwjYGAo4B6QMLCN"
+
+PINECONE_ENVIRONMENT = "us-east-1"  # Example: "us-west1-gcp-free"
+
+# Create an instance of the Pinecone class
+pc = Pinecone(api_key=PINECONE_API_KEY)
+
+# Load the embedding model
+embedding_model = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
+
+# Create or connect to a Pinecone index
+index_name = "document-embeddings"
+if index_name not in pc.list_indexes().names():
+    pc.create_index(
+        name=index_name,
+        dimension=384,  # Dimension of the embeddings
+        metric="cosine",
+        spec=ServerlessSpec(
+            cloud="aws",  # Use "gcp" or "azure" if needed
+            region="us-east-1"  # Use your preferred region
+        )
+    )
+
+# Connect to the Pinecone index
+index = pc.Index(index_name)
+
+# Home view
 def home(request):
     return render(request, "home.html")
 
@@ -23,18 +51,27 @@ def load_pdf(pdf_file):
         text += page.extract_text()
     return text
 
-# Function to split text into smaller chunks
+# Function to split text into chunks
 def split_text_into_chunks(text):
     text_splitter = CharacterTextSplitter(chunk_size=500, chunk_overlap=50)
     chunks = text_splitter.split_text(text)
     return chunks
 
-# Function to generate embeddings using Hugging Face model
-def embed_text_chunks_with_huggingface(chunks):
-    embeddings = embedding_model.encode(chunks, convert_to_tensor=True)
-    return embeddings.tolist()  # Convert tensor to list for JSON response
 
-# Django View to upload and process file
+def split_text_into_documents(text, source):
+    text_splitter = CharacterTextSplitter(chunk_size=500, chunk_overlap=50)
+    chunks = text_splitter.split_text(text)
+    
+    # Convert chunks into Document objects with metadata
+    documents = [Document(page_content=chunk, metadata={"source": source}) for chunk in chunks]
+    return documents
+
+def embed_text_chunks(documents):
+    # Use the correct method 'embed_documents' to generate embeddings
+    embeddings = embedding_model.embed_documents([doc.page_content for doc in documents])
+    return embeddings
+
+# Django view to upload and process file
 def upload_file(request):
     if request.method == "POST" and request.FILES.get("uploaded_file"):
         uploaded_file = request.FILES["uploaded_file"]
@@ -46,45 +83,48 @@ def upload_file(request):
         else:
             return JsonResponse({"error": "Unsupported file format"}, status=400)
 
-        # Split text into smaller chunks
-        chunks = split_text_into_chunks(text)
+        # Split text into chunks and convert to Document objects
+        documents = split_text_into_documents(text, source=file_name)
+        embeddings = embed_text_chunks(documents)
+        print(embeddings)
+        #Generate embeddings and store in Pinecone using LangChain's PineconeVectorStore
+        vectorstore = PineconeVectorStore.from_documents(
+            documents=documents,
+            embedding=embedding_model,
+            index_name=index_name
+        )
 
-        # Get embeddings using Hugging Face model
-        embeddings = embed_text_chunks_with_huggingface(chunks)
-
-        # Return response with embeddings
-        return JsonResponse({"embeddings": embeddings})
+        return JsonResponse({"message": "File uploaded and embeddings stored in Pinecone!"})
 
     return render(request, "upload.html")
 
-
-from django.shortcuts import render, redirect
-
-
+# User registration view
 def register(request):
-    if request.method == 'POST':
+    if request.method == "POST":
         form = UserCreationForm(request.POST)
         if form.is_valid():
             user = form.save()
             login(request, user)  # Log the user in after registration
-            return redirect('home')  # Redirect to a home page or dashboard
+            return redirect("home")  # Redirect to the home page
     else:
         form = UserCreationForm()
-    return render(request, 'registration.html', {'form': form})
+    return render(request, "registration.html", {"form": form})
 
+# User login view
 def user_login(request):
-    if request.method == 'POST':
-        username = request.POST['username']
-        password = request.POST['password']
+    if request.method == "POST":
+        username = request.POST["username"]
+        password = request.POST["password"]
         user = authenticate(request, username=username, password=password)
         if user is not None:
             login(request, user)
-            return redirect('home')  # Redirect to a home page or dashboard
+            return redirect("home")  # Redirect to the home page
         else:
             # Return an error message
-            return render(request, 'accounts/login.html', {'error': 'Invalid username or password'})
-    return render(request, 'login.html')
+            return render(request, "login.html", {"error": "Invalid username or password"})
+    return render(request, "login.html")
 
+# User logout view
 def user_logout(request):
     logout(request)
-    return redirect('home')  # Redirect to the home page or login page
+    return redirect("home")  # Redirect to the home page
