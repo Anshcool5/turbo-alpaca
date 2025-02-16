@@ -9,12 +9,14 @@ import os
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib import messages
 from django.contrib.auth import login, authenticate, logout
-
+from dotenv import load_dotenv
 from langchain.schema import Document
 
+# Load environment variables from .env file
+load_dotenv()
 
 # Initialize Pinecone
-PINECONE_API_KEY= ""
+PINECONE_API_KEY= os.getenv("PINECONE_API_KEY")
 
 PINECONE_ENVIRONMENT = "us-east-1"  # Example: "us-west1-gcp-free"
 
@@ -98,6 +100,7 @@ def upload_file(request):
 
         messages.success(request, "File uploaded is a success !")
         return render(request, "home.html")
+
 
 # User registration view
 def register(request):
