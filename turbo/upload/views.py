@@ -11,13 +11,17 @@ from django.contrib import messages
 from django.contrib.auth import login, authenticate, logout
 from dotenv import load_dotenv
 from langchain.schema import Document
+from langchain.llms import Ollama  # Use LangChain's Ollama LLM integration
+
 
 # Load environment variables from .env file
 load_dotenv()
 
-# Initialize Pinecone
-PINECONE_API_KEY= os.getenv("PINECONE_API_KEY")
+# Initialize the Ollama LLM (Llama 3.2 model)
+llm = Ollama(model="llama3")
 
+# Initialize Pinecone
+PINECONE_API_KEY = os.getenv("PINECONE_API_KEY")
 PINECONE_ENVIRONMENT = "us-east-1"  # Example: "us-west1-gcp-free"
 
 # Create an instance of the Pinecone class
@@ -60,7 +64,7 @@ def split_text_into_chunks(text):
     chunks = text_splitter.split_text(text)
     return chunks
 
-
+# Function to split text into Document objects with metadata
 def split_text_into_documents(text, source):
     text_splitter = CharacterTextSplitter(chunk_size=500, chunk_overlap=50)
     chunks = text_splitter.split_text(text)
@@ -69,6 +73,7 @@ def split_text_into_documents(text, source):
     documents = [Document(page_content=chunk, metadata={"source": source}) for chunk in chunks]
     return documents
 
+# Function to embed text chunks
 def embed_text_chunks(documents):
     # Use the correct method 'embed_documents' to generate embeddings
     embeddings = embedding_model.embed_documents([doc.page_content for doc in documents])
@@ -91,16 +96,18 @@ def upload_file(request):
         documents = split_text_into_documents(text, source=file_name)
         embeddings = embed_text_chunks(documents)
         print(embeddings)
-        #Generate embeddings and store in Pinecone using LangChain's PineconeVectorStore
+
+        # Generate embeddings and store in Pinecone using LangChain's PineconeVectorStore
         vectorstore = PineconeVectorStore.from_documents(
             documents=documents,
             embedding=embedding_model,
             index_name=index_name
         )
 
-        messages.success(request, "File uploaded is a success !")
+        messages.success(request, "File uploaded successfully!")
         return render(request, "home.html")
 
+    return render(request, "home.html")
 
 # User registration view
 def register(request):
@@ -133,7 +140,6 @@ def user_logout(request):
     logout(request)
     return redirect("home")  # Redirect to the home page
 
-
 def query_pinecone(request):
     if request.method == "POST":
         query_text = request.POST.get("query")
@@ -141,20 +147,34 @@ def query_pinecone(request):
             return JsonResponse({"error": "Query text is required"}, status=400)
 
         # Convert query to an embedding
-        query_embedding = embedding_model.embed_query(query_text)  # Shape: (384,)
+        query_embedding = embedding_model.embed_query(query_text)
 
         # Search in Pinecone
         search_results = index.query(vector=query_embedding, top_k=5, include_metadata=True)
 
-        # Extract matching documents
-        matches = [
-            {
-                "score": match["score"], 
-                "text": match["metadata"]["source"]
-            }
+        # Extract full document content from metadata
+        retrieved_docs = [
+            match["metadata"].get("content", "No content available")
             for match in search_results["matches"]
         ]
 
-        return JsonResponse({"results": matches})
+        # Combine retrieved file contents into a context string
+        context = "\n\n".join(retrieved_docs)
+
+        # Create a contextualized prompt for Llama 3.2
+        prompt = f"""Use the following document contents to answer the question:
+        {context}
+        
+        Question: {query_text}
+        Answer:"""
+
+        # Get response from the Llama model
+        response = llm(prompt)
+
+        return JsonResponse({
+            "query": query_text,
+            "context": retrieved_docs,
+            "answer": response
+        })
 
     return render(request, "query.html")

@@ -10,5 +10,6 @@ urlpatterns = [
     path('home/', views.home, name='home'),  # Home page
     path('register/', views.register, name='register'),  # User registration
     path('login/', views.user_login, name='login'),  # User login
-    path('logout/', views.user_logout, name='logout'),  # User logout
+    path('logout/', views.user_logout, name='logout'),  # User logoutx
+    path('query/', views.query_pinecone, name='query')
 ]
