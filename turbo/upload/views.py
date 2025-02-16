@@ -14,6 +14,9 @@ from langchain.schema import Document
 # from langchain.llms import Ollama  # Use LangChain's Ollama LLM integration
 from transformers import pipeline
 import json
+import ijson
+import sys
+
 
 # Replace Ollama with Hugging Face LLM
 llm = pipeline("text-generation", model="gpt2")
@@ -84,40 +87,63 @@ def embed_text_chunks(documents):
     return embeddings
 
 
+def process_large_json(file):
+    text = ""
+    parser = ijson.items(file, "item")  # Adjust the JSON path based on your structure
+    for item in parser:
+        text += json.dumps(item) + "\n"
+        if len(text) > 10000:  # Process in chunks of 10,000 characters
+            yield text
+            text = ""  # Reset text buffer
+    if text:
+        yield text
+
 def upload_file(request):
     if request.method == "POST" and request.FILES.get("uploaded_file"):
         uploaded_file = request.FILES["uploaded_file"]
         file_name = uploaded_file.name.lower()
 
-        # Extract text based on file type
-        if file_name.endswith(".pdf"):
-            text = load_pdf(uploaded_file)
-        elif file_name.endswith(".json"):
-            try:
-                # Read and parse the JSON file
-                json_data = json.load(uploaded_file)
-                # Convert JSON to text (you can customize this based on your JSON structure)
-                text = json.dumps(json_data)  # Convert JSON to a string
-            except json.JSONDecodeError:
-                messages.error(request, "Invalid JSON file")
+        # Initialize variables
+        documents = []
+
+        try:
+            # Extract text based on file type
+            if file_name.endswith(".pdf"):
+                # Process PDF file
+                text = load_pdf(uploaded_file)
+                # Split text into chunks and convert to Document objects
+                documents = split_text_into_documents(text, source=file_name)
+
+            elif file_name.endswith(".json"):
+                # Process JSON file in chunks using process_large_json
+                for chunk in process_large_json(uploaded_file):
+                    documents.extend(split_text_into_documents(chunk, source=file_name))
+
+            else:
+                messages.error(request, "Unsupported file format")
                 return render(request, "home.html")
-        else:
-            messages.error(request, "Unsupported file format")
-            return render(request, "home.html")
 
-        # Split text into chunks and convert to Document objects
-        documents = split_text_into_documents(text, source=file_name)
-        embeddings = embed_text_chunks(documents)
-        print(embeddings)
+            # Validate metadata size before uploading
+            for doc in documents:
+                metadata_size = sys.getsizeof(doc.metadata)
+                if metadata_size > 40960:  # 40 KB limit
+                    messages.error(request, f"Metadata size exceeds limit: {metadata_size} bytes")
+                    return render(request, "home.html")
 
-        # Generate embeddings and store in Pinecone using LangChain's PineconeVectorStore
-        vectorstore = PineconeVectorStore.from_documents(
-            documents=documents,
-            embedding=embedding_model,
-            index_name=index_name
-        )
+            # Generate embeddings and store in Pinecone using LangChain's PineconeVectorStore
+            try:
+                vectorstore = PineconeVectorStore.from_documents(
+                    documents=documents,
+                    embedding=embedding_model,
+                    index_name=index_name
+                )
+                messages.success(request, "File uploaded successfully!")
+            except Exception as e:
+                messages.error(request, f"Failed to upload to Pinecone: {str(e)}")
 
-        messages.success(request, "File uploaded successfully!")
+        except Exception as e:
+            messages.error(request, f"An error occurred: {str(e)}")
+
         return render(request, "home.html")
 
     return render(request, "home.html")
