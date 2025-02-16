@@ -128,3 +128,29 @@ def user_login(request):
 def user_logout(request):
     logout(request)
     return redirect("home")  # Redirect to the home page
+
+
+def query_pinecone(request):
+    if request.method == "POST":
+        query_text = request.POST.get("query")
+        if not query_text:
+            return JsonResponse({"error": "Query text is required"}, status=400)
+
+        # Convert query to an embedding
+        query_embedding = embedding_model.embed_query(query_text)  # Shape: (384,)
+
+        # Search in Pinecone
+        search_results = index.query(vector=query_embedding, top_k=5, include_metadata=True)
+
+        # Extract matching documents
+        matches = [
+            {
+                "score": match["score"], 
+                "text": match["metadata"]["source"]
+            }
+            for match in search_results["matches"]
+        ]
+
+        return JsonResponse({"results": matches})
+
+    return render(request, "query.html")
