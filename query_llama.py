@@ -10,7 +10,7 @@ load_dotenv()
 # Get the API Key from .env
 groq_api_key = os.getenv("GROQ_API_KEY")
 
-llm = ChatGroq(temperature=0, model_name="llama-3.3-70b-versatile", groq_api_key=groq_api_key)
+llm = ChatGroq(temperature=0, model_name="deepseek-r1-distill-llama-70b", groq_api_key=groq_api_key)
 
 # Input text
 #input_text = "I want to analyse the curent sales  of my business"
@@ -19,14 +19,14 @@ llm = ChatGroq(temperature=0, model_name="llama-3.3-70b-versatile", groq_api_key
 # Print the response
 #print(response.content)
 
-query = "I want you to forecast my sales"
+query = "How are you doing today?"
 
 metrics_input = f"""You are a robust and well trained business advisor for business owners.
-                Ask the user for relevant documents to aid your advising based on the query: '{query}'."""
+                Ask the user for relevant documents if needed to aid your advising based on the query: '{query}'."""
 
 metrics_template = """
 Human: {text}
-Assistant: ask the users for relevant documents to aid your analysis.
+Assistant: ONLY return the relevant documents needed to aid your analysis, else return an appropriate response.
 """
 
 metrics_prompt = PromptTemplate(template=metrics_template,
@@ -34,4 +34,13 @@ metrics_prompt = PromptTemplate(template=metrics_template,
 
 qa1 = LLMChain(llm=llm, prompt=metrics_prompt)
 result1 = qa1.generate([{"text": metrics_input}])
-print(result1.generations[0][0].text)
+output = result1.generations[0][0].text
+#print(output)
+
+if "</think>" in output:
+    after_think = output.split("</think>")[1].strip()  # Split and take the part after </think>
+else:
+    after_think = ""  # Handle the case where </think> is not found
+
+#print("Text After </think>:")
+print(after_think)
