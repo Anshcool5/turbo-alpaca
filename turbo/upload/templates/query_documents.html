@@ -7,7 +7,14 @@
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-50 min-h-screen flex flex-col justify-center items-center">
-    <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-4xl">
+
+    <!-- Loader (Initially Visible) -->
+    <div id="loader" class="mt-6 flex justify-center">
+        <div class="animate-spin rounded-full h-12 w-12 border-t-4 border-blue-500"></div>
+    </div>
+
+    <!-- Main Content (Initially Hidden) -->
+    <div id="content" class="bg-white rounded-lg shadow-lg p-6 w-full max-w-4xl hidden">
         <h2 class="text-2xl font-semibold text-gray-800 mb-4 text-center">Document Results</h2>
         
         {% if results %}
@@ -29,6 +36,22 @@
             </a>
         </div>
     </div>
+
+    <script>
+        // Show the loader and hide after 5 seconds, then show the content
+        document.addEventListener("DOMContentLoaded", function() {
+            // Show loader when the page loads
+            document.getElementById("loader").classList.remove("hidden");
+
+            // Hide loader and show content after 5 seconds
+            setTimeout(function() {
+                document.getElementById("loader").classList.add("hidden"); // Hide the loader
+                document.getElementById("content").classList.remove("hidden"); // Show the content
+            }, 5000);
+        });
+    </script>
+
 </body>
 </html>
+
 
