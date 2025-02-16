@@ -19,16 +19,20 @@
         <form method="post" class="space-y-4">
             {% csrf_token %}
             
-            <!-- Django Form Fields -->
             {% for field in form %}
             <div>
                 <label class="block text-sm font-medium text-gray-700">{{ field.label }}</label>
                 {{ field }}
                 {% if field.errors %}
-                <p class="text-red-500 text-xs mt-1">{{ field.errors|striptags }}</p>
+                <div class="text-red-500 text-xs mt-1">
+                    {% for error in field.errors %}
+                    <p>{{ error }}</p>
+                    {% endfor %}
+                </div>
                 {% endif %}
             </div>
             {% endfor %}
+
             
             <button type="submit" class="w-full py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500">
                 Register
