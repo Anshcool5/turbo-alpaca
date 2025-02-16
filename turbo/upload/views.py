@@ -7,6 +7,7 @@ from langchain.vectorstores import Pinecone as PineconeVectorStore
 from pinecone import Pinecone, ServerlessSpec
 import os
 from django.contrib.auth.forms import UserCreationForm
+from django.contrib import messages
 from django.contrib.auth import login, authenticate, logout
 
 from langchain.schema import Document
@@ -81,7 +82,8 @@ def upload_file(request):
         if file_name.endswith(".pdf"):
             text = load_pdf(uploaded_file)
         else:
-            return JsonResponse({"error": "Unsupported file format"}, status=400)
+            messages.error(request, "Unsupported file format")
+            return render(request, "home.html")
 
         # Split text into chunks and convert to Document objects
         documents = split_text_into_documents(text, source=file_name)
@@ -94,9 +96,8 @@ def upload_file(request):
             index_name=index_name
         )
 
-        return JsonResponse({"message": "File uploaded and embeddings stored in Pinecone!"})
-
-    return render(request, "home.html")
+        messages.success(request, "File uploaded is a success !")
+        return render(request, "home.html")
 
 # User registration view
 def register(request):
