@@ -179,6 +179,23 @@ def user_logout(request):
     logout(request)
     return redirect("login")  # Redirect to the login page
 
+from django.core.mail import send_mail
+from django.http import HttpResponse
+import os
+
+def test_email(request):
+    try:
+        send_mail(
+            'Test Email',
+            'This is a test email.',
+            os.getenv("EMAIL_HOST_USER"),  # FROM address
+            ['melritacyriac123@gmail.com'],  # Replace with a valid recipient email address
+            fail_silently=False,
+        )
+        return HttpResponse("Test email sent.")
+    except Exception as e:
+        return HttpResponse(f"Error: {e}")
+
 #query documents
 def query_documents(request):
     if request.method == "POST":
