@@ -53,7 +53,7 @@ print(possible_metrics)
 
 list_keys = []
 for metric in possible_metrics:
-    key_input = """Based on the provided dictionary, can you find all the relevant keys to compute the metric {metric} and return them as the 
+    key_input = f"""Based on the provided dictionary, can you find all the relevant keys to compute the metric {metric} and return them as the 
     value fields in a dictionary with the key being the metric."""
 
     key_template = """
@@ -70,8 +70,8 @@ for metric in possible_metrics:
     try:
         list_keys.append(json.loads(result1.generations[0][0].text))
     except JSONDecodeError:
-        print(result1.generations[0][0].text)
+        #print(result1.generations[0][0].text)
         pass
     time.sleep(3)
 
-#print(list_keys)
+print(list_keys)
