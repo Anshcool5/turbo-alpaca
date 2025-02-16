@@ -131,4 +131,4 @@ def user_login(request):
 # User logout view
 def user_logout(request):
     logout(request)
-    return redirect("home")  # Redirect to the home page
+    return redirect("login")  # Redirect to the home page
