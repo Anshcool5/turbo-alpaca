@@ -82,7 +82,7 @@ def user_login(request):
             return redirect('home')  # Redirect to a home page or dashboard
         else:
             # Return an error message
-            return render(request, 'accounts/login.html', {'error': 'Invalid username or password'})
+            return render(request, 'login.html', {'error': 'Invalid username or password'})
     return render(request, 'login.html')
 
 def user_logout(request):
