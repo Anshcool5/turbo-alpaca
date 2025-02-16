@@ -69,4 +69,17 @@
         </div>
     </div>
 </div>
+
+<!-- Footer with Logout Button -->
+<footer class="bg-white-200 text-center py-6 mt-12">
+    <form action="{% url 'logout' %}" method="POST">
+        {% csrf_token %}
+        <button type="submit" 
+                class="px-4 py-2 bg-red-600 text-white rounded-lg
+                       hover:bg-red-700 transition-colors">
+            Logout
+        </button>
+    </form>
+</footer>
+</div>
 {% endblock %}
