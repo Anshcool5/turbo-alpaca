@@ -3,23 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Query Documents</title>
+    <title>Document Results</title>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-    <h2>Search for Documents</h2>
-    <form method="POST">
-        {% csrf_token %}
-        <input type="text" name="query" placeholder="Enter your search query">
-        <button type="submit">Search</button>
-    </form>
+<body class="bg-gray-50 min-h-screen flex flex-col justify-center items-center">
+    <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-4xl">
+        <h2 class="text-2xl font-semibold text-gray-800 mb-4 text-center">Document Results</h2>
+        
+        {% if results %}
+            <ul class="space-y-4">
+                {% for result in results %}
+                    <li class="bg-gray-100 p-4 rounded-lg shadow-sm text-gray-700">
+                        <strong>{{ result.text }}</strong>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p class="text-gray-600 text-center">No results found.</p>
+        {% endif %}
 
-    {% if results %}
-        <h3>Search Results:</h3>
-        <ul>
-            {% for result in results %}
-                <li>Match Score: {{ result.score }} - <strong>{{ result.text }}</strong></li>
-            {% endfor %}
-        </ul>
-    {% endif %}
+        <!-- Centered button with margin for spacing -->
+        <div class="mt-10 flex justify-center">
+            <a href="{% url 'home' %}" class="px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
+                Go Back
+            </a>
+        </div>
+    </div>
 </body>
 </html>
+
