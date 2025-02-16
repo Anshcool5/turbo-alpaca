@@ -16,6 +16,7 @@ from transformers import pipeline
 import json
 import ijson
 import sys
+from .file_handling import create_file_record
 
 
 # Replace Ollama with Hugging Face LLM
@@ -107,6 +108,7 @@ def upload_file(request):
         documents = []
 
         try:
+            create_file_record(request.user, uploaded_file)
             # Extract text based on file type
             if file_name.endswith(".pdf"):
                 # Process PDF file
@@ -208,30 +210,3 @@ def query_documents(request):
     return render(request, "query_documents.html")
 
 
-# def query_pinecone(request):
-#     if request.method == "POST":
-#         query_text = request.POST.get("query")
-        
-#         if not query_text:
-#             return JsonResponse({"error": "Query text is required"}, status=400)
-
-#         # Convert query to an embedding
-#         query_embedding = embedding_model.embed_query(query_text)  # Shape: (384,)
-
-#         # Search in Pinecone
-#         search_results = index.query(vector=query_embedding, top_k=5, include_metadata=True)
-
-#         # Extract matching documents
-#         matches = []
-#         if "matches" in search_results:
-#             matches = [
-#                 {
-#                     "score": match["score"],
-#                     "text": match["metadata"].get("source", "No source available")  # Avoid KeyError
-#                 }
-#                 for match in search_results["matches"]
-#             ]
-
-#         return render(request, "query.html", {"results": matches})
-
-#     return render(request, "query.html")
