@@ -13,6 +13,7 @@ from dotenv import load_dotenv
 from langchain.schema import Document
 # from langchain.llms import Ollama  # Use LangChain's Ollama LLM integration
 from transformers import pipeline
+import json
 
 # Replace Ollama with Hugging Face LLM
 llm = pipeline("text-generation", model="gpt2")
@@ -82,7 +83,7 @@ def embed_text_chunks(documents):
     embeddings = embedding_model.embed_documents([doc.page_content for doc in documents])
     return embeddings
 
-# Django view to upload and process file
+
 def upload_file(request):
     if request.method == "POST" and request.FILES.get("uploaded_file"):
         uploaded_file = request.FILES["uploaded_file"]
@@ -91,6 +92,15 @@ def upload_file(request):
         # Extract text based on file type
         if file_name.endswith(".pdf"):
             text = load_pdf(uploaded_file)
+        elif file_name.endswith(".json"):
+            try:
+                # Read and parse the JSON file
+                json_data = json.load(uploaded_file)
+                # Convert JSON to text (you can customize this based on your JSON structure)
+                text = json.dumps(json_data)  # Convert JSON to a string
+            except json.JSONDecodeError:
+                messages.error(request, "Invalid JSON file")
+                return render(request, "home.html")
         else:
             messages.error(request, "Unsupported file format")
             return render(request, "home.html")
@@ -143,12 +153,10 @@ def user_logout(request):
     logout(request)
     return redirect("login")  # Redirect to the login page
 
-
-
-def query_pinecone(request):
+#query documents
+def query_documents(request):
     if request.method == "POST":
         query_text = request.POST.get("query")
-        
         if not query_text:
             return JsonResponse({"error": "Query text is required"}, status=400)
 
@@ -169,6 +177,35 @@ def query_pinecone(request):
                 for match in search_results["matches"]
             ]
 
-        return render(request, "query.html", {"results": matches})
+        return render(request, "query_documents.html", {"results": matches})
 
-    return render(request, "query.html")
+    return render(request, "query_documents.html")
+
+
+# def query_pinecone(request):
+#     if request.method == "POST":
+#         query_text = request.POST.get("query")
+        
+#         if not query_text:
+#             return JsonResponse({"error": "Query text is required"}, status=400)
+
+#         # Convert query to an embedding
+#         query_embedding = embedding_model.embed_query(query_text)  # Shape: (384,)
+
+#         # Search in Pinecone
+#         search_results = index.query(vector=query_embedding, top_k=5, include_metadata=True)
+
+#         # Extract matching documents
+#         matches = []
+#         if "matches" in search_results:
+#             matches = [
+#                 {
+#                     "score": match["score"],
+#                     "text": match["metadata"].get("source", "No source available")  # Avoid KeyError
+#                 }
+#                 for match in search_results["matches"]
+#             ]
+
+#         return render(request, "query.html", {"results": matches})
+
+#     return render(request, "query.html")
