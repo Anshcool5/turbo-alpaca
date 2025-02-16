@@ -96,7 +96,7 @@ def upload_file(request):
 
         return JsonResponse({"message": "File uploaded and embeddings stored in Pinecone!"})
 
-    return render(request, "upload.html")
+    return render(request, "home.html")
 
 # User registration view
 def register(request):
