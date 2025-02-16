@@ -17,6 +17,8 @@ import json
 import ijson
 import sys
 from .file_handling import create_file_record
+from django.core.files.storage import default_storage
+
 
 
 # Replace Ollama with Hugging Face LLM
@@ -99,6 +101,7 @@ def process_large_json(file):
     if text:
         yield text
 
+
 def upload_file(request):
     if request.method == "POST" and request.FILES.get("uploaded_file"):
         uploaded_file = request.FILES["uploaded_file"]
@@ -108,23 +111,31 @@ def upload_file(request):
         documents = []
 
         try:
-            create_file_record(request.user, uploaded_file)
+            # Create the file record and save the file
+            file_record = create_file_record(request.user, uploaded_file, file_name)
+            
+            # Determine the path to the saved file
+            file_path = os.path.join(default_storage.location, 'uploads', file_name)
+            print("file_path", file_path)
             # Extract text based on file type
             if file_name.endswith(".pdf"):
-                # Process PDF file
-                text = load_pdf(uploaded_file)
+                # Process PDF file by reading from the file path
+                with open(file_path, 'rb') as file:
+                    text = load_pdf(file)
                 # Split text into chunks and convert to Document objects
                 documents = split_text_into_documents(text, source=file_name)
 
             elif file_name.endswith(".json"):
                 # Process JSON file in chunks using process_large_json
-                for chunk in process_large_json(uploaded_file):
-                    documents.extend(split_text_into_documents(chunk, source=file_name))
+                with open(file_path, 'r') as file:
+                    for chunk in process_large_json(file):
+                        documents.extend(split_text_into_documents(chunk, source=file_name))
 
             else:
                 messages.error(request, "Unsupported file format")
                 return render(request, "home.html")
 
+            print(documents[:10])  # Print the first few documents for debugging
             # Validate metadata size before uploading
             for doc in documents:
                 metadata_size = sys.getsizeof(doc.metadata)
@@ -149,6 +160,11 @@ def upload_file(request):
         return render(request, "home.html")
 
     return render(request, "home.html")
+
+
+
+
+
 
 # User registration view
 def register(request):
@@ -225,5 +241,6 @@ def query_documents(request):
         return render(request, "query_documents.html", {"results": matches})
 
     return render(request, "query_documents.html")
+
 
 
