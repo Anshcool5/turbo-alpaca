@@ -55,7 +55,7 @@ def get_llama_response(query: str):
 
 import gradio as gr
 #from langchain_core.runnables import Runnable
-#runnable: Runnable = prompt | llm 
+#runnable: Runnable = prompt | llm cd
 
 test = gr.Interface(fn=get_llama_response, inputs="text", outputs="text")
 test.launch()

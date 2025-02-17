@@ -195,7 +195,7 @@ def calculate_stock_returns(sales_df):
         return None
     return sales_df[temp["Returns"]].sum()
 
-
+#graph 1
 def forecast_sales_prophet(sales_df, periods=30):
     if (temp["Year"] is None or temp["Year"] not in sales_df.columns or
         temp["Month"] is None or temp["Month"] not in sales_df.columns or
@@ -213,6 +213,7 @@ def forecast_sales_prophet(sales_df, periods=30):
     fig.add_scatter(x=grouped['ds'], y=grouped['y'], mode='markers', name='Actual')
     return fig, forecast
 
+#graph 2
 def forecast_sales_xgboost(sales_df, periods=3):
     if (temp["Year"] is None or temp["Year"] not in sales_df.columns or
         temp["Month"] is None or temp["Month"] not in sales_df.columns or
@@ -263,6 +264,7 @@ def forecast_sales_xgboost(sales_df, periods=3):
     
     return fig, rmse, r2, future_df
 
+#graph 3
 def combine_forecasts(prophet_df, xgboost_df):
     # Check that both forecast DataFrames have the required columns.
     if (prophet_df is None or xgboost_df is None or 
@@ -279,6 +281,7 @@ def combine_forecasts(prophet_df, xgboost_df):
     fig.add_scatter(x=merged["ds"], y=merged["xgb_pred"], mode="lines", name="XGBoost")
     return fig, merged
 
+#graph 4
 def perform_customer_segmentation(sales_df):
     # Assume get_customer_demographics is defined elsewhere.
     if (temp["customer_id"] is None or temp["customer_id"] not in sales_df.columns or
@@ -301,6 +304,7 @@ def perform_customer_segmentation(sales_df):
                      title="Customer Segmentation: Age vs Total Revenue")
     return fig, df
 
+#graph 5
 def plot_seasonal_decomposition(sales_df):
     if (temp["Year"] is None or temp["Year"] not in sales_df.columns or
         temp["Month"] is None or temp["Month"] not in sales_df.columns or
@@ -318,6 +322,7 @@ def plot_seasonal_decomposition(sales_df):
     plt.tight_layout()
     return fig
 
+#graph 6
 def plot_correlation_heatmap(sales_df):
     numeric_cols = sales_df.select_dtypes(include=[np.number]).columns
     if not numeric_cols.any():
