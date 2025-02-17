@@ -27,8 +27,10 @@ from django.views.decorators.csrf import csrf_exempt
 from .chatty import run_llm
 from .business import run_business_analysis
 
+from .parser import parse_business_idea
+
 # Replace Ollama with Hugging Face LLM
-llm = pipeline("text-generation", model="gpt2")
+#llm = pipeline("text-generation", model="gpt2")
 
 # Load environment variables from .env file
 load_dotenv()
@@ -243,18 +245,31 @@ def generate_idea(request):
     if request.method == "POST" and request.FILES.get("uploaded_file"):
         uploaded_file = request.FILES["uploaded_file"]
         file_name = uploaded_file.name.lower()
-        file_path = os.path.join(default_storage.location, 'uploads', file_name)
+        file_path = os.path.join(default_storage.location, "uploads", file_name)
 
         try:
-            # Save the file record and extract file path
-            file_record = create_file_record(request.user, uploaded_file, file_name)
-            
+            # Save the file
+            with default_storage.open(file_path, "wb+") as destination:
+                for chunk in uploaded_file.chunks():
+                    destination.write(chunk)
+
+            # Run AI business analysis
             ai_response = run_business_analysis(file_path)
-
-            # Store response in session
-            request.session["business_idea"] = ai_response
-
-            return JsonResponse({"response": ai_response})  # Return AI response as JSON
+            #print(ai_response, "working?")
+            # Parse JSON response
+            # print(ai_response)
+            # print(type(ai_response))
+            obj = parse_business_idea(ai_response)
+            print("obj", obj)
+            #string
+            name = obj["name"]
+            #string
+            explanation = obj["explanation"]
+            #list
+            steps = obj["how_to_set_up"]
+            print(steps)
+            
+            return render(request, "upload/resume.html", {"name": name, "explanation": explanation, "steps": steps})
 
         except Exception as e:
             return JsonResponse({"error": str(e)})

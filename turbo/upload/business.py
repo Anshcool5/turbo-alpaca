@@ -37,20 +37,30 @@ def run_business_analysis(file_path):
     Resume Content:
     {resume_text}
 
-    Suggested Business Idea:
+    Provide the response in a **strict JSON format** with the following structure:
+    {{
+        "name": "A concise and compelling name for the business idea",
+        "explanation": "A detailed explanation of what the business is, how it works, and why it aligns with the candidate's skills",
+        "how_to_set_up": [
+            {{
+                "step": 1,
+                "title": "Step Title",
+                "description": "Detailed description of this step in setting up the business"
+            }},
+            {{
+                "step": 2,
+                "title": "Step Title",
+                "description": "Detailed description of this step in setting up the business"
+            }},
+            ...
+        ]
+    }}
+
+    Ensure the output is **valid JSON format** with no extra text, explanations, or commentary outside of the JSON object, and do not add quotes, because it messes up with the JSON format.
     """)
 
     # Format the prompt with the extracted resume text
     formatted_prompt = prompt.format(resume_text=resume_text)
-
-
     # Invoke the LLM to generate a response
     ai_response = chat.invoke(formatted_prompt)
     return ai_response.content
-
-if __name__ == "__main__":
-    # Hardcoded file path to the resume PDF
-    file_path = "/Users/siddharthdileep/hacked-2025/turbo-alpaca/turbo/media/uploads/siddharth_dileep_resume_2025-deloitte-pages-1.pdf"
-    response = run_business_analysis(file_path)
-    # print(response)
-    # print(response.content)
