@@ -48,6 +48,7 @@ embedding_model = HuggingFaceEmbeddings(model_name="sentence-transformers/all-Mi
 
 # Create or connect to a Pinecone index
 index_name = "document-embeddings"
+index_name = "resumes"
 if index_name not in pc.list_indexes().names():
     pc.create_index(
         name=index_name,
@@ -176,7 +177,8 @@ def upload_file(request):
 
 
 
-def upload_resume(request):
+def generate_idea(request):
+    index_name = "resumes"
     if request.method == "POST" and request.FILES.get("uploaded_file"):
         uploaded_file = request.FILES["uploaded_file"]
         file_name = uploaded_file.name.lower()
@@ -190,7 +192,7 @@ def upload_resume(request):
             
             # Determine the path to the saved file
             file_path = os.path.join(default_storage.location, 'uploads', file_name)
-            print("file_path", file_path)
+            #print("file_path", file_path)
             # Extract text based on file type
             if file_name.endswith(".pdf"):
                 # Process PDF file by reading from the file path
@@ -202,7 +204,7 @@ def upload_resume(request):
                 messages.error(request, "Unsupported file format")
                 return render(request, "upload/resume.html")
 
-            print(documents[:10])  # Print the first few documents for debugging
+            #print(documents[:10])  # Print the first few documents for debugging
             # Validate metadata size before uploading
             for doc in documents:
                 metadata_size = sys.getsizeof(doc.metadata)
@@ -218,18 +220,19 @@ def upload_resume(request):
                     index_name=index_name
                 )
                 messages.success(request, "File uploaded successfully!")
+                return redirect("generate")
             except Exception as e:
                 messages.error(request, f"Failed to upload to Pinecone: {str(e)}")
-                return redirect("resume")  # Redirect to home page if error occurs in Pinecone upload
+                return redirect("generate")  # Redirect to home page if error occurs in Pinecone upload
 
 
             # After successful upload, refresh the recent files list
             recent_files = update_file_list(request)
-            return render(request, "upload/resume.html")
+            return render()
         
         except Exception as e:
             messages.error(request, f"An error occurred: {str(e)}")
-            return redirect("resume")  # Redirect to home page if any error occurs
+            return redirect("generate")  # Redirect to home page if any error occurs
 
         return render(request, "upload/home.html")
 

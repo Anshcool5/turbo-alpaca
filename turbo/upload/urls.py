@@ -22,9 +22,9 @@ urlpatterns = [
     path('logout/', views.user_logout, name='logout'),  # User logout
     path("query_documents/", views.query_documents, name="query_documents"),
     path("chatty/", views.chatbot_view, name="chatty"),
-    path("resume/", views.upload_resume, name="resume"),
+    path("generate/", views.generate_idea, name="generate"),
     # Dashboard
-    path("dashboard/", views.dashboard, name="dashboard")
+    path("dashboard/", views.dashboard, name="dashboard"),
 
     #chatbot
 ]
