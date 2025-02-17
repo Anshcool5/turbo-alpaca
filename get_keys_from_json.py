@@ -15,9 +15,7 @@ load_dotenv()
 groq_api_key = os.getenv("GROQ_API_KEY")
 open_router_api_key = os.getenv("OPEN_ROUTER_API_KEY")
 
-def analyze_keys():
-    # Specify the path to the JSON file
-    file_path = 'data_for_chroma/business.retailsales2.json'
+def analyze_keys(file_path):
 
     # Open and load the JSON file
     with open(file_path, mode='r', encoding='utf-8') as json_file:
