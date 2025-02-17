@@ -381,7 +381,7 @@ def query_documents(request):
         # Convert query to an embedding
 
         # Render the results on the query_documents page
-        return render(request, "upload/query_documents.html", {"results": matches})
+        return render(request, "upload/query_documents.html", {"results": file_names})
 
     return render(request, "upload/query_documents.html")
 
