@@ -21,6 +21,8 @@ from django.core.files.storage import default_storage
 
 from django.db import connection
 
+from django.db import connection
+
 
 
 # Replace Ollama with Hugging Face LLM
@@ -276,6 +278,10 @@ def query_documents(request):
         return render(request, "query_documents.html", {"results": matches})
 
     return render(request, "query_documents.html")
+
+
+
+
 
 
 
