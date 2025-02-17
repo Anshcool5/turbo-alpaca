@@ -35,33 +35,51 @@
     <main class="flex-1 p-8">
         <h1 class="text-4xl font-bold text-gray-900 mb-6 text-center">Dashboard Overview</h1>
 
-        <!-- Analytics and Chart Section -->
+        <!-- Static Charts Section -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <div class="bg-white p-6 rounded-lg shadow-lg relative">
                 <h2 class="text-xl font-semibold text-gray-800">User Engagement</h2>
                 <p class="text-gray-600 mt-2">Track how users interact with your platform.</p>
                 <canvas id="engagementChart"></canvas>
             </div>
-
             <div class="bg-white p-6 rounded-lg shadow-lg relative">
                 <h2 class="text-xl font-semibold text-gray-800">File Uploads</h2>
                 <p class="text-gray-600 mt-2">View recent file uploads and trends.</p>
                 <canvas id="uploadsChart"></canvas>
             </div>
-
             <div class="bg-white p-6 rounded-lg shadow-lg relative">
                 <h2 class="text-xl font-semibold text-gray-800">System Health</h2>
                 <p class="text-gray-600 mt-2">Monitor system performance and stability.</p>
                 <canvas id="healthChart"></canvas>
             </div>
         </div>
+
+        {% comment %} <!-- Automatically Display the Revenue Plot -->
+        {% if revenue_plot_url %}
+        <div class="bg-white p-6 rounded-lg shadow-lg mt-8">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">Total Revenue Over Time</h2>
+            <iframe src="{{ revenue_plot_url }}" width="100%" height="600" frameborder="0"></iframe>
+        </div>
+        {% else %}
+        <p class="mt-8 text-center">No revenue plot available.</p>
+        {% endif %} {% endcomment %}
+        {% if plot_urls %}
+            {% for url in plot_urls %}
+                <div class="bg-white p-6 rounded-lg shadow-lg mt-8">
+                    <iframe src="{{ url }}" width="100%" height="600" frameborder="0"></iframe>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p class="mt-8 text-center">No plots available.</p>
+        {% endif %}
+
     </main>
 </div>
 
-<!-- Chart.js (For Data Visualizations) -->
+<!-- Chart.js for static charts -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
 <script>
+    // Initialize static charts
     document.addEventListener("DOMContentLoaded", function () {
         const ctx1 = document.getElementById("engagementChart").getContext("2d");
         const ctx2 = document.getElementById("uploadsChart").getContext("2d");
@@ -107,5 +125,4 @@
         });
     });
 </script>
-
 {% endblock %}

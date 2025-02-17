@@ -18,13 +18,17 @@ import ijson
 import sys
 from .file_handling import create_file_record
 from django.core.files.storage import default_storage
-
+import pandas as pd
+from django.conf import settings
+from plotly.offline import plot
 from django.db import connection
 
 import datetime
-
+from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from .chatty import run_llm
+from .business_idea_analysis import run_idea
+
 from .business import run_business_analysis
 
 from .parser import parse_business_idea
@@ -443,12 +447,82 @@ def chatbot_view(request):
     
     return JsonResponse({"response": "Invalid request method."})
 
-def dashboard(request):
-    return render(request, "upload/dashboard.html")
+
+# from .data_analysis_func import (
+#     calculate_total_revenue_data, plot_total_revenue,
+#     calculate_profit_margin_data, plot_profit_margin,
+#     calculate_number_of_transactions_data, plot_number_of_transactions,
+#     calculate_peak_sales_period_data, plot_peak_sales_period,
+#     calculate_seasonal_fluctuations_data, plot_seasonal_fluctuations,
+#     calculate_customer_churn_data, plot_customer_churn,
+#     get_best_sellers_data, plot_best_sellers,
+#     get_worst_sellers_data, plot_worst_sellers,
+#     get_stock_levels_data, plot_stock_levels,
+#     forecast_stock_data, plot_forecast_stock,
+#     suggest_stock_ordering_data, plot_stock_ordering,
+#     calculate_stock_valuation_data, plot_stock_valuation,
+#     check_stock_expiry_data, plot_stock_expiry,
+#     calculate_stock_spoilage_data, plot_stock_spoilage,
+#     forecast_sales_prophet_data, plot_sales_prophet,
+#     perform_customer_segmentation_data, plot_customer_segmentation,
+#     correlation_heatmap_data, plot_correlation_heatmap
+# )
 
 def evaluate(request):
     return render(request, "upload/evaluate.html")
 
+def process_idea(request):
+
+    if request.method == 'POST':
+        # Retrieve form data
+        print('REQYESTTTT',request)
+        breakpoint
+        idea_name = request.POST.get('idea_name')
+        idea_text = request.POST.get('idea_text')
+        industry = request.POST.get('industry')
+
+        # Call your Python function with the form data // returns metric values
+        metrics  = run_idea(idea_name, idea_text, industry)
+        # Pass the metrics to the template
+        return render(request, 'upload/llamafinal.html', {'metrics': metrics})
+    
+
+def dashboard(request):
+    plot_dir = os.path.join(settings.MEDIA_ROOT, "plots")
+    plot_urls = []
+    try:
+        for file in os.listdir(plot_dir):
+            if file.endswith(".html"):
+                # Build the URL from MEDIA_URL (ensure MEDIA_URL is set correctly in settings.py)
+                file_url = os.path.join(settings.MEDIA_URL, "plots", file)
+                plot_urls.append(file_url)
+    except Exception as e:
+        print("Error loading plot files:", e)
+    
+    context = {
+        "plot_urls": plot_urls,
+    }
+    return render(request, "upload/dashboard.html", context)
 
 
+# def dashboard(request):
+#     # Load your data (adjust the path as needed)
+#     file_name = "file_data.json"
+#     file_path = os.path.join(default_storage.location, 'uploads', file_name)
+#     data = pd.read_json('C:/Users/prana/Documents/Projects/hackED2025/turbo-alpaca/turbo/upload/file_data.json')
+    
+#     # Calculate the revenue data using your function
+#     revenue_data = calculate_total_revenue_data(data)
+    
+#     # Generate the plot URL if data is available
+#     revenue_plot_url = None
+#     if revenue_data and revenue_data.get("grouped_data") is not None:
+#         # plot_total_revenue has been updated to save the figure as an HTML file and return its URL
+#         revenue_plot_url = plot_total_revenue(revenue_data["grouped_data"])
+    
+#     # Pass the plot URL in the context
+#     context = {
+#         "revenue_plot_url": revenue_plot_url,
+#     }
+#     return render(request, "upload/dashboard.html", context)
 
