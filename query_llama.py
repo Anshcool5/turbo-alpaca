@@ -19,14 +19,14 @@ llm = ChatGroq(temperature=0, model_name="deepseek-r1-distill-llama-70b", groq_a
 # Print the response
 #print(response.content)
 
-query = "How are you doing today?"
+query = "I want to perform a sales forecast"
 
-metrics_input = f"""You are a robust and well trained business advisor for business owners.
+metrics_input = f"""You are a robust and well trained business advisor for small business owners.
                 Ask the user for relevant documents if needed to aid your advising based on the query: '{query}'."""
 
 metrics_template = """
 Human: {text}
-Assistant: ONLY return the relevant documents needed to aid your analysis, else return an appropriate response.
+Assistant: ONLY return the relevant documents needed to aid your analysis, else return an appropriate response. 
 """
 
 metrics_prompt = PromptTemplate(template=metrics_template,
@@ -44,3 +44,10 @@ else:
 
 #print("Text After </think>:")
 print(after_think)
+
+#to-do:
+#1. Store requested relevant documents
+#2. Check the first dictionary from the JSON and see which category it fits
+#3. check if all the requested documents are provided, if yes, perform analysis
+#4. Else, perform possible analysis and inform user.
+#5. every csv might have a distnct column structure, how to perform the necessary forecast on it?
