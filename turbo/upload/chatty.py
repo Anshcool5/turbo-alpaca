@@ -3,8 +3,8 @@ import os
 from dotenv import load_dotenv
 from langchain.chains import LLMChain
 from langchain.prompts import PromptTemplate
-from ...get_keys_from_json import analyze_keys
-from ...perform_analysis import determine_and_call_analytics
+from .get_keys_from_json import analyze_keys
+from .perform_analysis import determine_and_call_analytics
 #from ...explain_plot import 
 
 load_dotenv()
