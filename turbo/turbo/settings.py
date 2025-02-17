@@ -143,3 +143,5 @@ MEDIA_URL = "/media/"
 
 # Directory where media files are stored
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
+
+# Storage settings for Django 5.x

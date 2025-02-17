@@ -13,8 +13,8 @@ def run_llm(query: str, INDEX_NAME):
 
     # Initialize Groq LLM
     chat = ChatGroq(
-        model_name="llama-3.3-70b-versatile",
-        temperature=0.0,
+        model_name="mixtral-8x7b-32768",
+        temperature=0.7,
         verbose=True,
     )
 
