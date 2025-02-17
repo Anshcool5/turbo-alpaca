@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Llama ClipPath Example</title>
+  <style>
+    /* A container to stack the images and SVG on top of each other */
+    #llama-container {
+      position: relative;
+      width: 300px;
+      height: 300px;
+      margin: 50px auto; /* center on page */
+      border: 1px solid #ccc;
+    }
+    /* Black-and-white llama at the bottom */
+    #llama-bw {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 300px;
+      height: 300px;
+      z-index: 1;
+    }
+    /* SVG (with clipped coloured llama) on top */
+    #llama-svg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 300px;
+      height: 300px;
+      z-index: 2;
+    }
+  </style>
+</head>
+<body>
+
+<h2>Fill the Coloured Llama Above the Black-and-White Llama</h2>
+
+<div id="llama-container">
+  <!-- 1) Black-and-white llama background -->
+  <img 
+    id="llama-bw" 
+    src="llama_bw.png" 
+    alt="Black and White Llama" 
+  />
+
+  <!-- 2) SVG that clips the coloured llama to a 5-point polygon -->
+  <svg id="llama-svg" width="300" height="300" viewBox="0 0 300 300">
+    <defs>
+      <clipPath id="metricClip">
+        <!-- Polygon (initially a dummy shape); we'll update via JS -->
+        <polygon id="metricPolygon" points="150,50 220,130 190,220 110,220 80,130" />
+      </clipPath>
+    </defs>
+
+    <!-- Coloured llama, clipped by the polygon -->
+    <image 
+      href="llama.png" 
+      x="0" 
+      y="0" 
+      width="300" 
+      height="300" 
+      clip-path="url(#metricClip)" 
+    />
+  </svg>
+</div>
+
+<script>
+  /*
+    5 metrics, each 0–100.
+    If all are 100, the polygon will cover the entire image (full radius).
+  */
+  const metrics = [70, 30, 60, 10, 90];
+
+  // Centre of the SVG
+  const centerX = 150;
+  const centerY = 150;
+
+  // Max radius: ~212 covers corners of a 300×300 (distance from centre (150,150) to corner (0,0))
+  const maxRadius = 212;
+
+  // Angle between points (for 5 metrics => 72° each)
+  const angleStep = (2 * Math.PI) / metrics.length;
+
+  // Calculate new polygon points based on metrics
+  function updatePolygonPoints(metrics) {
+    let pointsArray = [];
+     metrics.forEach((value, i) => {
+      // Scale each metric to a radius (0–212)
+      let radius = (value / 100) * maxRadius;
+      // Start from top (-90° offset), then move around 72° each
+      let angle = i * angleStep - Math.PI / 2;
+      let x = centerX + radius * Math.cos(angle);
+      let y = centerY + radius * Math.sin(angle);
+      pointsArray.push(`${x},${y}`);
+    });
+    return pointsArray.join(' ');
+  }
+
+  // Update the polygon with the new coordinates
+  const polygon = document.getElementById('metricPolygon');
+  polygon.setAttribute('points', updatePolygonPoints(metrics));
+</script>
+
+</body>
+</html>

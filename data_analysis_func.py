@@ -39,15 +39,17 @@ temp = {'Total Sales': None, 'Gross Sales': None, 'Net Sales': None, 'Total Orde
         'customer_id': None, 'product_id': None, 'quantity': None, 'date': None, 'Year': None, 'Month': None, 'cost_price': None, 'stock_level': None, 'expiry_date': None}
 
 
-from get_keys_from_json import analyze_keys
+# from get_keys_from_json import analyze_keys
 
-analyzed_keys = analyze_keys()
+# analyzed_keys = analyze_keys()
 
-for key, value in analyzed_keys.items():
-    if key in temp:
-        temp[key] = value
+temp = {'Total Sales': 'Total Sales', 'Gross Sales': 'Gross Sales', 'Net Sales': 'Net Sales', 'Total Orders': 'Total Orders', 'Discounts': 'Discounts', 'Returns': 'Returns', 'Shipping': 'Shipping', 'customer_id': None, 'product_id': None, 'quantity': None, 'date': None, 'Year': 'Year', 'Month': 'Month', 'cost_price': None, 'stock_level': None, 'expiry_date': None}
 
-print(temp)
+# for key, value in analyzed_keys.items():
+#     if key in temp:
+#         temp[key] = value
+
+# print(temp)
 
 # Display the first few rows
 data.head()
@@ -93,6 +95,7 @@ def calculate_peak_sales_period(sales_df):
     peak_day = grouped.idxmax()
     peak_value = grouped.max()
     return peak_day, peak_value
+
 
 def calculate_seasonal_fluctuations(sales_df):
     if (temp["Year"] is None or temp["Year"] not in sales_df.columns or
@@ -202,12 +205,10 @@ def forecast_sales_prophet(sales_df, periods=30):
     df["Period"] = pd.to_datetime(df[temp["Year"]].astype(str) + "-" + df[temp["Month"]].astype(str) + "-01")
     grouped = df.groupby("Period")[temp["Total Sales"]].sum().reset_index()
     grouped.columns = ["ds", "y"]
-    from prophet import Prophet
     model = Prophet(daily_seasonality=False, yearly_seasonality=True, weekly_seasonality=False)
     model.fit(grouped)
     future = model.make_future_dataframe(periods=periods, freq='MS')
     forecast = model.predict(future)
-    import plotly.express as px
     fig = px.line(forecast, x='ds', y='yhat', title="Prophet Forecast: Total Sales")
     fig.add_scatter(x=grouped['ds'], y=grouped['y'], mode='markers', name='Actual')
     return fig, forecast
@@ -218,9 +219,8 @@ def forecast_sales_xgboost(sales_df, periods=3):
         temp["Total Sales"] is None or temp["Total Sales"] not in sales_df.columns):
         return None, None, None, None
 
-    import numpy as np
-    from xgboost import XGBRegressor
-    from sklearn.metrics import mean_squared_error, r2_score
+    # print("dvssbsvajfhvakhckivaikhas")
+
     df = sales_df.copy()
     df["Period"] = pd.to_datetime(df[temp["Year"]].astype(str) + "-" + df[temp["Month"]].astype(str) + "-01")
     grouped = df.groupby("Period")[temp["Total Sales"]].sum().reset_index().sort_values("Period")
@@ -252,10 +252,8 @@ def forecast_sales_xgboost(sales_df, periods=3):
         future_preds.append((current_date, pred))
         current_lags = [pred, current_lags[0], current_lags[1]]
     
-    import pandas as pd
     future_df = pd.DataFrame(future_preds, columns=["date", "prediction"])
     
-    import plotly.express as px
     fig = px.line(grouped, x="Period", y=temp["Total Sales"], title="XGBoost Forecast: Total Sales")
     fig.add_scatter(x=future_df["date"], y=future_df["prediction"], mode="lines", name="Forecasted")
     
@@ -276,7 +274,6 @@ def combine_forecasts(prophet_df, xgboost_df):
     x_df.columns = ["ds", "xgb_pred"]
     merged = pd.merge(p_df, x_df, on="ds", how="inner")
     merged["combined"] = (merged["yhat"] + merged["xgb_pred"]) / 2
-    import plotly.express as px
     fig = px.line(merged, x="ds", y="combined", title="Ensemble Forecast (Prophet + XGBoost)")
     fig.add_scatter(x=merged["ds"], y=merged["yhat"], mode="lines", name="Prophet")
     fig.add_scatter(x=merged["ds"], y=merged["xgb_pred"], mode="lines", name="XGBoost")
@@ -297,10 +294,8 @@ def perform_customer_segmentation(sales_df):
     df['gender_numeric'] = df['gender'].map({'Male': 0, 'Female': 1})
     features = df[['age', 'total_revenue', 'transaction_count', 'gender_numeric']]
     
-    from sklearn.cluster import KMeans
     kmeans = KMeans(n_clusters=3, random_state=42)
     df['cluster'] = kmeans.fit_predict(features)
-    import plotly.express as px
     fig = px.scatter(df, x='age', y='total_revenue', color='cluster',
                      hover_data=['transaction_count', 'gender'],
                      title="Customer Segmentation: Age vs Total Revenue")
@@ -314,9 +309,7 @@ def plot_seasonal_decomposition(sales_df):
     df = sales_df.copy()
     df["Period"] = pd.to_datetime(df[temp["Year"]].astype(str) + "-" + df[temp["Month"]].astype(str) + "-01")
     grouped = df.groupby("Period")[temp["Total Sales"]].sum().asfreq("MS").fillna(0)
-    from statsmodels.tsa.seasonal import seasonal_decompose
     decomposition = seasonal_decompose(grouped, model="additive", period=12)
-    import matplotlib.pyplot as plt
     fig, axes = plt.subplots(4, 1, figsize=(10, 8), sharex=True)
     decomposition.observed.plot(ax=axes[0], title="Observed")
     decomposition.trend.plot(ax=axes[1], title="Trend")
@@ -326,58 +319,39 @@ def plot_seasonal_decomposition(sales_df):
     return fig
 
 def plot_correlation_heatmap(sales_df):
-    # Build a list of column names from temp that exist in sales_df.
-    # desired = [value for key, value in temp.items() if value is not None and value in sales_df.columns]
-    # if not desired:
-    #     return None
-    # corr = sales_df[desired].corr()
-    # import plotly.express as px
-    # fig = px.imshow(corr, text_auto=True, title="Correlation Heatmap: Sales Metrics")
-    # return fig
-    desired = []
-    for key, value in temp.items():
-        if value is not None:
-            desired.append(value)
-    cols = [col for col in desired if col in sales_df.columns]
-    if not cols:
+    numeric_cols = sales_df.select_dtypes(include=[np.number]).columns
+    if not numeric_cols.any():
         return None
-    corr = sales_df[cols].corr()
+    corr = sales_df[numeric_cols].corr()
     fig = px.imshow(corr, text_auto=True, title="Correlation Heatmap: Sales Metrics")
     return fig
 
 
-# fig, rmse, r2, forecast = forecast_sales_xgboost(data, periods=30)
+# Run forecast using XGBoost model
+fig_xgb, rmse_xgb, r2_xgb, forecast_xgb_df = forecast_sales_xgboost(data, periods=30)
 
-# fig.show()
+# Run forecast using Prophet model
+fig_prophet, forecast_prophet_df = forecast_sales_prophet(data, periods=30)
 
-# print(calculate_total_revenue(data))
-# print(calculate_customer_churn(data))
+# Combine the Prophet and XGBoost forecasts
+fig_combined, combined_df = combine_forecasts(forecast_prophet_df, forecast_xgb_df)
 
-# fig , forecast = forecast_sales_prophet(data, periods=30)
-
-fig1 = plot_correlation_heatmap(data)
-# print(fig1)
-fig1.show()
-
-# print(data)
-# print(forecast)
-# fig.show()
+# Display the combined forecast figure
+fig_combined.show()
 
 
-# Run forecast using XGBoost model and store outputs in unique variables
-# fig_xgb, rmse_xgb, r2_xgb, forecast_xgb_df = forecast_sales_xgboost(data, periods=3)
 
-# # Run forecast using Prophet model and store outputs in unique variables
-# fig_prophet, forecast_prophet_df = forecast_sales_prophet(data, periods=3)
-
-# # Run seasonal decomposition plot and store the output
-# fig_seasonal_decomp = plot_seasonal_decomposition(data)
-
-# # Run correlation heatmap plot and store the output
-# fig_corr_heatmap = plot_correlation_heatmap(data)
-
-# # Combine the two forecasts (Prophet + XGBoost) and store outputs
-# fig_combined, combined_df = combine_forecasts(forecast_prophet_df, forecast_xgb_df)
-
-
-# output = {"Total Revenue": calculate_total_revenue(data), "Profit Margin": calculate_profit_margin(data), "Number of Transactions": calculate_number_of_transactions(data), "Average Sale Value": calculate_average_sale_value(data), "Peak Sales Period": calculate_peak_sales_period(data), "Seasonal Fluctuations": calculate_seasonal_fluctuations(data), "Combined Forecast": fig_combined, "Seasonal Decomposition": fig_seasonal_decomp, "Correlation Heatmap": fig_corr_heatmap}
+# use output to store the results of the analysis and feed the dictionary to the chroma API
+output = {
+    "Total Revenue": calculate_total_revenue(data),
+    "Profit Margin": calculate_profit_margin(data),
+    "Number of Transactions": calculate_number_of_transactions(data),
+    "Average Sale Value": calculate_average_sale_value(data),
+    "Peak Sales Period": calculate_peak_sales_period(data),
+    "Seasonal Fluctuations": calculate_seasonal_fluctuations(data),
+    "XGBoost RMSE": rmse_xgb,
+    "XGBoost R2": r2_xgb,
+    "Forecast XGBoost Data": forecast_xgb_df.to_dict(orient="records"),
+    "Forecast Prophet Data": forecast_prophet_df.to_dict(orient="records"),
+    "Combined Forecast Data": combined_df.to_dict(orient="records")
+}
