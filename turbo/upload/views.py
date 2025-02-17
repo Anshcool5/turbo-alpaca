@@ -433,25 +433,25 @@ def chatbot_view(request):
     return JsonResponse({"response": "Invalid request method."})
 
 
-from .data_analysis_func import (
-    calculate_total_revenue_data, plot_total_revenue,
-    calculate_profit_margin_data, plot_profit_margin,
-    calculate_number_of_transactions_data, plot_number_of_transactions,
-    calculate_peak_sales_period_data, plot_peak_sales_period,
-    calculate_seasonal_fluctuations_data, plot_seasonal_fluctuations,
-    calculate_customer_churn_data, plot_customer_churn,
-    get_best_sellers_data, plot_best_sellers,
-    get_worst_sellers_data, plot_worst_sellers,
-    get_stock_levels_data, plot_stock_levels,
-    forecast_stock_data, plot_forecast_stock,
-    suggest_stock_ordering_data, plot_stock_ordering,
-    calculate_stock_valuation_data, plot_stock_valuation,
-    check_stock_expiry_data, plot_stock_expiry,
-    calculate_stock_spoilage_data, plot_stock_spoilage,
-    forecast_sales_prophet_data, plot_sales_prophet,
-    perform_customer_segmentation_data, plot_customer_segmentation,
-    correlation_heatmap_data, plot_correlation_heatmap
-)
+# from .data_analysis_func import (
+#     calculate_total_revenue_data, plot_total_revenue,
+#     calculate_profit_margin_data, plot_profit_margin,
+#     calculate_number_of_transactions_data, plot_number_of_transactions,
+#     calculate_peak_sales_period_data, plot_peak_sales_period,
+#     calculate_seasonal_fluctuations_data, plot_seasonal_fluctuations,
+#     calculate_customer_churn_data, plot_customer_churn,
+#     get_best_sellers_data, plot_best_sellers,
+#     get_worst_sellers_data, plot_worst_sellers,
+#     get_stock_levels_data, plot_stock_levels,
+#     forecast_stock_data, plot_forecast_stock,
+#     suggest_stock_ordering_data, plot_stock_ordering,
+#     calculate_stock_valuation_data, plot_stock_valuation,
+#     check_stock_expiry_data, plot_stock_expiry,
+#     calculate_stock_spoilage_data, plot_stock_spoilage,
+#     forecast_sales_prophet_data, plot_sales_prophet,
+#     perform_customer_segmentation_data, plot_customer_segmentation,
+#     correlation_heatmap_data, plot_correlation_heatmap
+# )
 
 def evaluate(request):
     return render(request, "upload/evaluate.html")
