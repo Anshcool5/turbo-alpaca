@@ -171,38 +171,41 @@
     document.getElementById("chatbot-send").addEventListener("click", function () {
         sendMessage();
     });
-
+    
     document.getElementById("chatbot-input").addEventListener("keypress", function (e) {
         if (e.key === "Enter") {
             sendMessage();
         }
     });
-
+    
     function sendMessage() {
         const input = document.getElementById("chatbot-input");
         const message = input.value.trim();
-
+    
         if (message !== "") {
             // Add user message to the chat
             const userMessage = document.createElement("div");
             userMessage.classList.add("chatbot-message", "chatbot-user");
+            userMessage.innerHTML = `<p>${message}</p>`;
             userMessage.innerHTML = "<p>${message}</p>";
             document.getElementById("chatbot-body").appendChild(userMessage);
-
+    
             // Clear the input
             input.value = "";
-
+    
             // Simulate a chatbot response
             setTimeout(function () {
                 const botResponse = document.createElement("div");
                 botResponse.classList.add("chatbot-message", "chatbot-response");
-                botResponse.innerHTML = <p>You said: "${message}". How can I assist you further?</p>;
+                botResponse.innerHTML = `<p>You said: "${message}". How can I assist you further?</p>`;
                 document.getElementById("chatbot-body").appendChild(botResponse);
-
+    
                 // Scroll to the bottom of the chat
                 document.getElementById("chatbot-body").scrollTop = document.getElementById("chatbot-body").scrollHeight;
             }, 1000);
         }
     }
+    
+    
 </script>
 {% endblock %}
