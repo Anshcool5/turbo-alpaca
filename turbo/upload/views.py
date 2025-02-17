@@ -23,6 +23,9 @@ from django.db import connection
 
 import datetime
 
+from django.views.decorators.csrf import csrf_exempt
+from .chatty import run_llm
+
 
 # Replace Ollama with Hugging Face LLM
 llm = pipeline("text-generation", model="gpt2")
@@ -319,6 +322,24 @@ def query_documents(request):
     return render(request, "upload/query_documents.html")
 
 
+
+@csrf_exempt
+def chatbot_view(request):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            user_message = data.get("message", "")
+            
+            print("user_message", user_message)
+            if user_message:
+                response = run_llm(user_message, index_name)
+                return JsonResponse({"response": response})
+            else:
+                return JsonResponse({"response": "Please enter a valid question."})
+        except Exception as e:
+            return JsonResponse({"response": f"An error occurred: {str(e)}"})
+    
+    return JsonResponse({"response": "Invalid request method."})
 
 
 

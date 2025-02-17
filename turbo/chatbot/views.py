@@ -8,7 +8,11 @@ from langchain.chains import LLMChain
 from langchain.prompts import PromptTemplate
 from langchain.memory import ConversationBufferMemory
 import threading
+<<<<<<< HEAD
 from get_keys_from_json import analyze_keys
+=======
+# from get_keys_from_json import analyze_keys
+>>>>>>> chatty
 
 # Load environment variables
 load_dotenv()
