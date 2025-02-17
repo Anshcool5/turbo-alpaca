@@ -51,23 +51,11 @@ if "</think>" in output:
 else:
     after_think = output.strip()
 
-with open("business_idea_analysis.txt", "w") as file:
-    file.write(after_think)
+numbers_before_slash = re.findall(r"(\d+)\s*/\s*\d+", after_think)
 
-# Regular expression pattern to extract metric names, ratings, and descriptions
-# Updated pattern to match any text after the metric details
-
-# print("Extracted Content:\n", after_think)
-pattern = r"\*\*(.*?)\s*\((\d+\.?\d*)/10\)\*\*:\s*(.*)"
-
-# Extracting data using regex
+pattern = r"\d+\.\s*\*\*(.*?)\*\*"
 matches = re.findall(pattern, after_think)
-# print(matches)
 
-# Storing the results in a dictionary
-business_metrics = {metric.strip(): [float(rating), description.strip()] for metric, rating, description in matches}
-# print(business_metrics)
+metric_values = {key: value for key, value in zip(matches, numbers_before_slash)}
 
-# Display the dictionary
-import pprint
-pprint.pprint(business_metrics)
+print(metric_values)

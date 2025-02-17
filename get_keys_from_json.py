@@ -49,7 +49,7 @@ def analyze_keys():
     qa2 = LLMChain(llm=llm, prompt=metrics_prompt)
     result2 = qa2.generate([{"text": metrics_input, "metrics_list": metrics_list, "dictionary": dictionary}])
     #possible_metrics = ast.literal_eval(result2.generations[0][0].text)
-    
+
     text = result2.generations[0][0].text
     pattern = r"Result\s*=\s*(\{.*?\})"
     match = re.search(pattern, text, re.DOTALL)
@@ -60,7 +60,7 @@ def analyze_keys():
     else:
         raise Exception("Key Extraction failed!")
 
-analyze_keys()
+print(analyze_keys())
 
 '''
 list_keys = []
