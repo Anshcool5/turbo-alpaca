@@ -124,6 +124,11 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
+# Add this if you store static files inside a 'static' folder in your project directory
+STATICFILES_DIRS = [
+    "C:/Users/melri/OneDrive/Desktop/turbo-alpaca/turbo/media/images"
+]
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
