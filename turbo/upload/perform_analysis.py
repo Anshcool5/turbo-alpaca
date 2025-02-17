@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 from langchain.chains import LLMChain
 from langchain.prompts import PromptTemplate
 from .data_analysis_func import FUNCTIONS
+import pandas as pd
 
 load_dotenv()
 
@@ -12,10 +13,12 @@ groq_api_key = os.getenv("GROQ_API_KEY")
 
 llm = ChatGroq(temperature=0, model_name="deepseek-r1-distill-llama-70b", groq_api_key=groq_api_key)
 
-def determine_and_call_analytics(query: str, key_list: list):
-    metric_funcs = available_functions_from_metrics(key_list)
-
-    metrics_input = f"""Based on the user query: '{query}' and the list of metric functions that can possibly be computed: {metric_funcs}, find the metric function needed 
+def determine_and_call_analytics(query: str, master_dict: dict):
+    print("sucess!")
+    metric_funcs = available_functions_from_metrics(master_dict)
+    print("sucess1!")
+    metric_funcs_list = metric_funcs.keys()
+    metrics_input = f"""Based on the user query: '{query}' and the list of metric functions that can possibly be computed: {metric_funcs_list}, find the metric function needed 
     to address the user's request. If the user's request can be addressed, return the metric function in the same format as the list. Else return NO."""
 
     metrics_template = """
@@ -35,7 +38,10 @@ def determine_and_call_analytics(query: str, key_list: list):
     output = result1.generations[0][0].text
     if output in metric_funcs:
         output = "Sure thing, I'll be generating your plots based on your shared files!"
-        result = FUNCTIONS[output]()
+        data = pd.read_json(metric_funcs[output])
+        calc_func_output = FUNCTIONS[output](data)
+        output = "\nDone!"
+
     elif "NO" in output:
         output = "I'm sorry your shared data is either missing key metrics or the  plot is out of my current scope."
 
@@ -70,9 +76,9 @@ def available_functions_from_metrics(available_metrics):
         "seasonal_decomposition_data": {"Year", "Month", "Total Sales"}
     }
     
-    available = []
+    available = {}
     for func_name, req_metrics in functions_requirements.items():
         # Check if every required metric is present in the available_metrics list
-        if all(metric in available_metrics for metric in req_metrics):
-            available.append(func_name)
+        if all(metric in available_metrics.keys() for metric in req_metrics):
+            available[func_name] = [available_metrics[metric][0] for metric in req_metrics if metric in available_metrics]
     return available
