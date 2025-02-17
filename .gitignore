@@ -17,3 +17,4 @@ media/
 # Sample data
 sample_data/
 data_for_chroma/
+turbo/db.sqlite3
