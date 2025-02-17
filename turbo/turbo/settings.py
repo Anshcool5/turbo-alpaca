@@ -122,12 +122,16 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = "/static/"
 
-# Add this if you store static files inside a 'static' folder in your project directory
+# Directory where static files are stored
 STATICFILES_DIRS = [
-    "C:/Users/melri/OneDrive/Desktop/turbo-alpaca/turbo/media/images"
+    os.path.join(BASE_DIR, "static"),  # This should contain CSS, JS, etc.
 ]
+
+# Static root (used when running `collectstatic` for production)
+STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
