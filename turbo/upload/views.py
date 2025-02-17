@@ -22,6 +22,7 @@ from django.core.files.storage import default_storage
 from django.db import connection
 
 from django.db import connection
+import datetime
 
 
 
@@ -157,16 +158,74 @@ def upload_file(request):
                 messages.success(request, "File uploaded successfully!")
             except Exception as e:
                 messages.error(request, f"Failed to upload to Pinecone: {str(e)}")
+                return redirect("home")  # Redirect to home page if error occurs in Pinecone upload
 
+
+            # After successful upload, refresh the recent files list
+            recent_files = update_file_list(request)
+            return render(request, "home.html", {"recent_files": recent_files})
+        
         except Exception as e:
             messages.error(request, f"An error occurred: {str(e)}")
+            return redirect("home")  # Redirect to home page if any error occurs
 
         return render(request, "home.html")
 
     return render(request, "home.html")
 
 
+def update_file_list(request):
+    try:
+        # Get logged-in username
+        username = request.user.username
 
+        # Debugging: Print the username
+        print(f"Logged-in username: {username}")
+
+        # Get user_id from auth_user table
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT id FROM auth_user WHERE username = %s", [username])
+            user_row = cursor.fetchone()
+
+        if not user_row:
+            return []  # If user is not found, return an empty list
+
+        user_id = user_row[0]  # Extract user ID
+
+        # Query the last 5 most recently uploaded files (descending order by uploaded_at)
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                SELECT file_name, uploaded_at
+                FROM upload_file
+                WHERE user_id = %s
+                ORDER BY uploaded_at DESC
+                LIMIT 5
+                """, 
+                [user_id]
+            )
+            files = cursor.fetchall()
+
+        # Format the result into a list of dictionaries
+        recent_files = [{"file_name": file[0], "uploaded_at": file[1]} for file in files]
+        print('recent files',recent_files)
+        return recent_files
+
+    except Exception as e:
+        return {"error": str(e)}  # Return error in case of failure
+
+# Home view, now with the call to update_file_list
+def home(request):
+    recent_files = update_file_list(request)  # Get the 5 most recently uploaded files
+
+    # Debugging: Check if recent_files has been fetched
+    print(f"Recent Files: {recent_files}")
+
+    if isinstance(recent_files, dict):  # In case of error, pass it to the template
+        messages.error(request, f"Error fetching recent files: {recent_files.get('error')}")
+        recent_files = []
+
+    return render(request, "home.html", {"recent_files": recent_files})
 
 
 
