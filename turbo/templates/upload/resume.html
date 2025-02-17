@@ -1,0 +1,9 @@
+<h1>Your Uploaded Files</h1>
+<ul>
+    {% for file in files %}
+        <li>
+            {{ file.file_name }} - Uploaded on {{ file.uploaded_at }}
+            <a href="{% url 'download_file' file.id %}">Download</a>
+        </li>
+    {% endfor %}
+</ul>
