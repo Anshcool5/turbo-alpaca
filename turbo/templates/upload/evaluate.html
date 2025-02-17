@@ -1,0 +1,55 @@
+
+{% extends 'upload/base.html' %}
+
+{% block title %}Evaluate Idea{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50">
+    <div class="text-center py-12">
+        <h1 class="text-4xl font-bold text-gray-900 sm:text-5xl">
+            Evaluate Idea !
+        </h1>
+    </div>
+
+    <!-- Main Content Section -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Enlarged Quick Upload Card -->
+        <div class="bg-white rounded-lg shadow-lg p-10 mb-12 max-w-3xl mx-auto">
+            <h2 class="text-3xl font-semibold text-gray-800 mb-6">Submit Your Idea</h2>
+            <form action="{% url 'process_data' %}" method="POST">
+                {% csrf_token %}
+                <div class="flex flex-col space-y-4">
+                    <!-- Idea Name Input -->
+                    <input type="text" 
+                           name="idea_name" 
+                           placeholder="Enter your idea's name"
+                           class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                           required>
+
+                    <!-- Business Idea Input -->
+                    <textarea name="idea_text" 
+                              rows="4"
+                              placeholder="Describe your business idea..."
+                              class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                              required></textarea>
+
+                    <!-- Relevant Industry Input -->
+                    <input type="text" 
+                           name="industry" 
+                           placeholder="Enter the relevant industry"
+                           class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                           required>
+
+                    <!-- Submit Button -->
+                    <button type="submit" 
+                            class="w-full p-3 bg-indigo-600 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        Evaluate Idea
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+

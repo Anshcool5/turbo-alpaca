@@ -1,6 +1,8 @@
 from django.urls import path
 from . import views
 from django.contrib.auth import views as auth_views
+from django.conf import settings
+from django.conf.urls.static import static
 
 
 
@@ -27,10 +29,17 @@ urlpatterns = [
     path('logout/', views.user_logout, name='logout'),  # User logout
     path("query_documents/", views.query_documents, name="query_documents"),
     path("chatty/", views.chatbot_view, name="chatty"),
-    path("resume/", views.upload_resume, name="resume"),
-    
+
+    path("generate/", views.generate_idea, name="generate"),
+
     # Dashboard
-    path("dashboard/", views.dashboard, name="dashboard")
+    path("dashboard/", views.dashboard, name="dashboard"),
+    path('evaluate/', views.evaluate, name='evaluate'),  # Update 'generate_idea' to your view function name
+    path('process_data/', views.process_idea, name='process_data'),
 
     #chatbot
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+

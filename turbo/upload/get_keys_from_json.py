@@ -58,7 +58,7 @@ def analyze_keys(file_path):
     else:
         raise Exception("Key Extraction failed!")
 
-print(analyze_keys())
+# print(analyze_keys())
 
 '''
 list_keys = []
