@@ -25,6 +25,7 @@ urlpatterns = [
     path("generate/", views.generate_idea, name="generate"),
     # Dashboard
     path("dashboard/", views.dashboard, name="dashboard"),
+    path('evaluate/', views.evaluate, name='evaluate'),  # Update 'generate_idea' to your view function name
 
     #chatbot
 ]

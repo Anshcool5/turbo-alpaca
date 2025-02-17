@@ -408,6 +408,9 @@ def chatbot_view(request):
 def dashboard(request):
     return render(request, "upload/dashboard.html")
 
+def evaluate(request):
+    return render(request, "upload/evaluate.html")
+
 
 
 
