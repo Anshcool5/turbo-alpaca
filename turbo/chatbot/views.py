@@ -7,7 +7,6 @@ from dotenv import load_dotenv
 from langchain.chains import LLMChain
 from langchain.prompts import PromptTemplate
 from langchain.memory import ConversationBufferMemory
-import threading
 
 # Load environment variables
 load_dotenv()
@@ -49,12 +48,12 @@ def get_llama_response(query: str):
 def create_gradio_interface():
     """Function to create and launch the Gradio interface."""
     iface = gr.Interface(fn=get_llama_response, inputs="text", outputs="text")
-    iface.launch(server_name="0.0.0.0", server_port=7860, share=False, inline=False)
+    iface.launch(share=True, inline=False)
 
-# Start Gradio in a separate thread
-threading.Thread(target=create_gradio_interface, daemon=True).start()
+# Launch Gradio externally, not within the Django view
+# Run Gradio in a separate process (or you can launch it manually externally)
+# threading.Thread(target=create_gradio_interface, daemon=True).start()
 
 def chatbot_view(request):
     """Django View: Embeds the Gradio chatbot using an iframe."""
-    # return HttpResponse("working")
     return render(request, "chatbot/chat.html")
