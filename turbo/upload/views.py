@@ -63,7 +63,7 @@ index = pc.Index(index_name)
 
 # Home view
 def home(request):
-    return render(request, "home.html")
+    return render(request, "upload/home.html")
 
 # Function to extract text from a PDF file
 def load_pdf(pdf_file):
@@ -138,7 +138,7 @@ def upload_file(request):
 
             else:
                 messages.error(request, "Unsupported file format")
-                return render(request, "home.html")
+                return render(request, "upload/home.html")
 
             print(documents[:10])  # Print the first few documents for debugging
             # Validate metadata size before uploading
@@ -146,7 +146,7 @@ def upload_file(request):
                 metadata_size = sys.getsizeof(doc.metadata)
                 if metadata_size > 40960:  # 40 KB limit
                     messages.error(request, f"Metadata size exceeds limit: {metadata_size} bytes")
-                    return render(request, "home.html")
+                    return render(request, "upload/home.html")
 
             # Generate embeddings and store in Pinecone using LangChain's PineconeVectorStore
             try:
@@ -163,15 +163,15 @@ def upload_file(request):
 
             # After successful upload, refresh the recent files list
             recent_files = update_file_list(request)
-            return render(request, "home.html", {"recent_files": recent_files})
+            return render(request, "upload/home.html", {"recent_files": recent_files})
         
         except Exception as e:
             messages.error(request, f"An error occurred: {str(e)}")
             return redirect("home")  # Redirect to home page if any error occurs
 
-        return render(request, "home.html")
+        return render(request, "upload/home.html")
 
-    return render(request, "home.html")
+    return render(request, "upload/home.html")
 
 
 def update_file_list(request):
@@ -225,7 +225,7 @@ def home(request):
         messages.error(request, f"Error fetching recent files: {recent_files.get('error')}")
         recent_files = []
 
-    return render(request, "home.html", {"recent_files": recent_files})
+    return render(request, "upload/home.html", {"recent_files": recent_files})
 
 
 
@@ -239,7 +239,7 @@ def register(request):
             return redirect("home")  # Redirect to the home page
     else:
         form = UserCreationForm()
-    return render(request, "registration.html", {"form": form})
+    return render(request, "upload/registration.html", {"form": form})
 
 # User login view
 def user_login(request):
@@ -252,8 +252,8 @@ def user_login(request):
             return redirect("home")  # Redirect to the home page
         else:
             # Return an error message
-            return render(request, 'login.html', {'error': 'Invalid username or password'})
-    return render(request, 'login.html')
+            return render(request, 'upload/login.html', {'error': 'Invalid username or password'})
+    return render(request, 'upload/login.html')
 
 # User logout view
 def user_logout(request):
@@ -283,7 +283,7 @@ def query_documents(request):
     if request.method == "POST":
         query_text = request.POST.get("query")
         if not query_text:
-            return render(request, "query_documents.html", {"error": "Query text is required"})
+            return render(request, "upload/query_documents.html", {"error": "Query text is required"})
 
         # Get logged-in username
         username = request.user.username
@@ -294,7 +294,7 @@ def query_documents(request):
             user_row = cursor.fetchone()
 
         if not user_row:
-            return render(request, "query_documents.html", {"error": "User not found in database"})
+            return render(request, "upload/query_documents.html", {"error": "User not found in database"})
 
         user_id = user_row[0]  # Extract user ID
 
@@ -309,7 +309,7 @@ def query_documents(request):
         file_names = [file[0] for file in files]  # Extract filenames
 
         if not file_names:
-            return render(request, "query_documents.html", {"error": "No files found for this user"})
+            return render(request, "upload/query_documents.html", {"error": "No files found for this user"})
 
         print(file_names)
 
@@ -334,9 +334,9 @@ def query_documents(request):
                         )
 
         # Render the results on the query_documents page
-        return render(request, "query_documents.html", {"results": matches})
+        return render(request, "upload/query_documents.html", {"results": matches})
 
-    return render(request, "query_documents.html")
+    return render(request, "upload/query_documents.html")
 
 
 

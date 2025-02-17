@@ -21,4 +21,6 @@ urlpatterns = [
     path('login/', views.user_login, name='login'),  # User login
     path('logout/', views.user_logout, name='logout'),  # User logout
     path("query_documents/", views.query_documents, name="query_documents"),
+    
+    #chatbot
 ]
