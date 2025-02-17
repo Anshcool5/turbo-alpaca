@@ -1,6 +1,7 @@
 from langchain_groq import ChatGroq
 from langchain_core.prompts import ChatPromptTemplate
 from PyPDF2 import PdfReader
+import json
 
 def load_pdf(pdf_file):
     """
@@ -56,11 +57,27 @@ def run_business_analysis(file_path):
         ]
     }}
 
-    Ensure the output is **valid JSON format** with no extra text, explanations, or commentary outside of the JSON object, and do not add quotes, because it messes up with the JSON format.
+    Ensure the output is **valid JSON format** with no extra text, explanations, or commentary outside of the JSON object.
     """)
 
     # Format the prompt with the extracted resume text
     formatted_prompt = prompt.format(resume_text=resume_text)
     # Invoke the LLM to generate a response
     ai_response = chat.invoke(formatted_prompt)
-    return ai_response.content
+    
+    # Clean up the response to ensure it's valid JSON
+    try:
+        # Remove any leading/trailing non-JSON text
+        json_start = ai_response.content.find('{')
+        json_end = ai_response.content.rfind('}') + 1
+        json_str = ai_response.content[json_start:json_end]
+        
+        # Parse the JSON to ensure it's valid
+        json_data = json.loads(json_str)
+        return json.dumps(json_data, indent=4)
+    except json.JSONDecodeError as e:
+        return f"🚨 Error: Failed to parse the LLM response as JSON. {e}"
+
+# Example usage
+# result = run_business_analysis("path_to_resume.pdf")
+# print(result)
