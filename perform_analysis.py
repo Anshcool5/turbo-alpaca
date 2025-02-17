@@ -14,13 +14,12 @@ llm = ChatGroq(temperature=0, model_name="deepseek-r1-distill-llama-70b-specdec"
 
 def determine_and_call_analytics(query: str, key_list: list):
 
-    metrics_input = f"""Based on the user query: '{query}' and the list of metrics {key_list}, determine if the requested
-    plots can be generated or not. If they ALL can be generated, return YES. If not all but some plots can be generated, 
-    return SOME along with the name of the plots that can be generated. Else return NO along with needed metrics to process the user request."""
+    metrics_input = f"""Based on the user query: '{query}', the list of metrics {key_list}, determine if the requested
+    plot can be generated or not. If it can be generated, return YES. Else return NO along with needed metrics to process the user request."""
 
     metrics_template = """
     Human: {text}
-    Assistant: return the word YES or SOME along with the name of the plots that can be generated or NO along with the needed metrics. 
+    Assistant: return the word YES or NO along with the needed metrics. 
     """
 
     metrics_prompt = PromptTemplate(
@@ -35,8 +34,7 @@ def determine_and_call_analytics(query: str, key_list: list):
     output = result1.generations[0][0].text
     if output.contains("YES"):
         output = "Sure thing, I'll be generating your plots based on your shared files!"
-    elif output.contains("SOME"):
-        output = "Based on the given data, I can only generate some, and I'll do so!"
+        
     elif output.contains("NO"):
         output = "I'm sorry your shared data is either missing key metrics or the  plot is out of my current scope."
 
