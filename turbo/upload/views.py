@@ -419,7 +419,7 @@ def chatbot_view(request):
             
             #print("user_message", user_message)
             if user_message:
-                response = run_llm(user_message, index_name)
+                response = run_llm(user_message, request.user)
                 return JsonResponse({"response": response})
             else:
                 return JsonResponse({"response": "Please enter a valid question."})
@@ -430,6 +430,9 @@ def chatbot_view(request):
 
 def dashboard(request):
     return render(request, "upload/dashboard.html")
+
+def evaluate(request):
+    return render(request, "upload/evaluate.html")
 
 
 
