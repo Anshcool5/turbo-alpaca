@@ -44,3 +44,5 @@ def run_llm(query: str):
 if __name__ == "__main__":
     res = run_llm(query="what are the potential names for me based on the documents in the index?")
     print(res["answer"])
+    print(res["context"])
+    print([doc.metadata["source"] for doc in res["context"]])
