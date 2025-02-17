@@ -22,9 +22,11 @@ from django.core.files.storage import default_storage
 from django.db import connection
 
 import datetime
-
+from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from .chatty import run_llm
+from .business_idea_analysis import run_idea
+
 from .business import run_business_analysis
 
 # Replace Ollama with Hugging Face LLM
@@ -433,6 +435,22 @@ def dashboard(request):
 
 def evaluate(request):
     return render(request, "upload/evaluate.html")
+
+def process_idea(request):
+
+    if request.method == 'POST':
+        # Retrieve form data
+        print('REQYESTTTT',request)
+        breakpoint
+        idea_name = request.POST.get('idea_name')
+        idea_text = request.POST.get('idea_text')
+        industry = request.POST.get('industry')
+
+        # Call your Python function with the form data // returns metric values
+        metrics  = run_idea(idea_name, idea_text, industry)
+        # Pass the metrics to the template
+        return render(request, 'upload/llamafinal.html', {'metrics': metrics})
+    
 
 
 
