@@ -22,6 +22,10 @@ urlpatterns = [
     path('logout/', views.user_logout, name='logout'),  # User logout
     path("query_documents/", views.query_documents, name="query_documents"),
     path("chatty/", views.chatbot_view, name="chatty"),
+    path("generate/", views.generate_idea, name="generate"),
+    # Dashboard
+    path("dashboard/", views.dashboard, name="dashboard"),
+    path('evaluate/', views.evaluate, name='evaluate'),  # Update 'generate_idea' to your view function name
 
     #chatbot
 ]

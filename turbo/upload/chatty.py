@@ -61,5 +61,4 @@ def run_llm(query: str, user):
         output = determine_and_call_analytics(query, key_list)
 
     #elif output == "EXPLAIN":
-
     return output

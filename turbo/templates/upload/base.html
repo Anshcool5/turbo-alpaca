@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -14,9 +15,10 @@
                 <div class="flex">
                     <!-- Logo -->
                     <div class="flex-shrink-0 flex items-center">
-                        <a href="{% url 'home' %}" class="text-xl font-bold text-indigo-600">
-                            Turbo
-                        </a>
+                        <a href="{% url 'home' %}" class="flex items-center space-x-2">
+                            <img src="{% static "C:\Users\melri\OneDrive\Desktop\turbo-alpaca\turbo\media\images\llama.jpg" %}" alt="Turbo Logo" class="h-10 w-10 rounded-full">
+                            <span class="text-xl font-bold text-indigo-600">Turbo</span>
+                        </a>                        
                     </div>
                     
                     <!-- Navigation Links -->
@@ -26,7 +28,34 @@
                             Home
                         </a>
                     </div>
+
+                    <!-- Navigation Links -->
+                    <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
+                        <a href="{% url 'generate' %}" 
+                        class="border-indigo-500 text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                            Generate Idea
+                        </a>
+                    </div>
+
+                    <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
+                        <a href="{% url 'dashboard' %}" 
+                        class="border-indigo-500 text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                            Dashboard
+                        </a>
+                    </div>
+
+                    <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
+                        <a href="{% url 'evaluate' %}" 
+                        class="border-indigo-500 text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                            Evaluate
+                        </a>
+                    </div>
+                    
                 </div>
+
+                
+                
+  
 
                 <!-- Mobile menu button -->
                 <div class="-mr-2 flex items-center sm:hidden">

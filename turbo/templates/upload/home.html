@@ -226,4 +226,44 @@
     }
 </script>
 
+<!-- Llama Reaction Animation -->
+<style>
+    .llama {
+        position: absolute;
+        font-size: 3rem;
+        opacity: 1;
+        transform: translateY(0);
+        transition: transform 5s ease-out, opacity 5s ease-out;
+    }
+</style>
+
+<script>
+    document.getElementById("upload-form").addEventListener("submit", function(event) {
+        event.preventDefault();
+        const reactionContainer = document.getElementById("llama-reactions");
+
+        for (let i = 0; i < 10; i++) {  // Increased number of llamas
+            const llama = document.createElement("div");
+            llama.textContent = "🦙";
+            llama.classList.add("llama");
+            llama.style.left = Math.random() * 100 + "%";
+            llama.style.right = Math.random() * 100 + "%";
+            llama.style.bottom = "-100"; // Start from the bottom
+            llama.style.position = "absolute";
+
+            reactionContainer.appendChild(llama);
+
+            setTimeout(() => {
+                llama.style.transform = "translateY(-150px)"; // Float higher
+            }, 50);
+
+            setTimeout(() => llama.style.opacity = "0", 1500); // Stay visible longer before fading
+
+            setTimeout(() => llama.remove(), 2500);
+        }
+
+        setTimeout(() => event.target.submit(), 2600); // Delay form submission
+    });
+</script>
+
 {% endblock %}

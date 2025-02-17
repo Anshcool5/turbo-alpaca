@@ -48,6 +48,7 @@ embedding_model = HuggingFaceEmbeddings(model_name="sentence-transformers/all-Mi
 
 # Create or connect to a Pinecone index
 index_name = "document-embeddings"
+index_name = "resumes"
 if index_name not in pc.list_indexes().names():
     pc.create_index(
         name=index_name,
@@ -173,6 +174,69 @@ def upload_file(request):
         return render(request, "upload/home.html")
 
     return render(request, "upload/home.html")
+
+
+
+def generate_idea(request):
+    index_name = "resumes"
+    if request.method == "POST" and request.FILES.get("uploaded_file"):
+        uploaded_file = request.FILES["uploaded_file"]
+        file_name = uploaded_file.name.lower()
+
+        # Initialize variables
+        documents = []
+
+        try:
+            # Create the file record and save the file
+            file_record = create_file_record(request.user, uploaded_file, file_name)
+            
+            # Determine the path to the saved file
+            file_path = os.path.join(default_storage.location, 'uploads', file_name)
+            #print("file_path", file_path)
+            # Extract text based on file type
+            if file_name.endswith(".pdf"):
+                # Process PDF file by reading from the file path
+                with open(file_path, 'rb') as file:
+                    text = load_pdf(file)
+                # Split text into chunks and convert to Document objects
+                documents = split_text_into_documents(text, source=file_name)
+            else:
+                messages.error(request, "Unsupported file format")
+                return render(request, "upload/resume.html")
+
+            #print(documents[:10])  # Print the first few documents for debugging
+            # Validate metadata size before uploading
+            for doc in documents:
+                metadata_size = sys.getsizeof(doc.metadata)
+                if metadata_size > 40960:  # 40 KB limit
+                    messages.error(request, f"Metadata size exceeds limit: {metadata_size} bytes")
+                    return render(request, "upload/resume.html")
+
+            # Generate embeddings and store in Pinecone using LangChain's PineconeVectorStore
+            try:
+                vectorstore = PineconeVectorStore.from_documents(
+                    documents=documents,
+                    embedding=embedding_model,
+                    index_name=index_name
+                )
+                messages.success(request, "File uploaded successfully!")
+                return redirect("generate")
+            except Exception as e:
+                messages.error(request, f"Failed to upload to Pinecone: {str(e)}")
+                return redirect("generate")  # Redirect to home page if error occurs in Pinecone upload
+
+
+            # After successful upload, refresh the recent files list
+            recent_files = update_file_list(request)
+            return render()
+        
+        except Exception as e:
+            messages.error(request, f"An error occurred: {str(e)}")
+            return redirect("generate")  # Redirect to home page if any error occurs
+
+        return render(request, "upload/home.html")
+
+    return render(request, "upload/resume.html")
 
 
 def update_file_list(request):
@@ -317,7 +381,7 @@ def query_documents(request):
         # Convert query to an embedding
 
         # Render the results on the query_documents page
-        return render(request, "upload/query_documents.html", {"results": matches})
+        return render(request, "upload/query_documents.html", {"results": file_names})
 
     return render(request, "upload/query_documents.html")
 
@@ -340,6 +404,12 @@ def chatbot_view(request):
             return JsonResponse({"response": f"An error occurred: {str(e)}"})
     
     return JsonResponse({"response": "Invalid request method."})
+
+def dashboard(request):
+    return render(request, "upload/dashboard.html")
+
+def evaluate(request):
+    return render(request, "upload/evaluate.html")
 
 
 

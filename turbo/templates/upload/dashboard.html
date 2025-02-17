@@ -1,0 +1,111 @@
+{% extends 'upload/base.html' %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 flex">
+    
+    <!-- Sidebar -->
+    <aside class="bg-indigo-700 text-white w-64 min-h-screen p-6 hidden sm:block">
+        <h2 class="text-2xl font-bold mb-6">Turbo Dashboard</h2>
+        <nav>
+            <ul>
+                <li class="mb-4">
+                    <a href="{% url 'home' %}" class="block py-2 px-4 rounded hover:bg-indigo-600">Home</a>
+                </li>
+                <li class="mb-4">
+                    <a href="#" class="block py-2 px-4 rounded hover:bg-indigo-600">Analytics</a>
+                </li>
+                <li class="mb-4">
+                    <a href="#" class="block py-2 px-4 rounded hover:bg-indigo-600">Settings</a>
+                </li>
+                <li class="mt-8">
+                    <form action="{% url 'logout' %}" method="POST">
+                        {% csrf_token %}
+                        <button type="submit" class="w-full py-2 px-4 rounded bg-red-600 hover:bg-red-700 text-white text-center">
+                            Logout
+                        </button>
+                    </form>
+                </li>
+            </ul>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 p-8">
+        <h1 class="text-4xl font-bold text-gray-900 mb-6 text-center">Dashboard Overview</h1>
+
+        <!-- Analytics and Chart Section -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div class="bg-white p-6 rounded-lg shadow-lg relative">
+                <h2 class="text-xl font-semibold text-gray-800">User Engagement</h2>
+                <p class="text-gray-600 mt-2">Track how users interact with your platform.</p>
+                <canvas id="engagementChart"></canvas>
+            </div>
+
+            <div class="bg-white p-6 rounded-lg shadow-lg relative">
+                <h2 class="text-xl font-semibold text-gray-800">File Uploads</h2>
+                <p class="text-gray-600 mt-2">View recent file uploads and trends.</p>
+                <canvas id="uploadsChart"></canvas>
+            </div>
+
+            <div class="bg-white p-6 rounded-lg shadow-lg relative">
+                <h2 class="text-xl font-semibold text-gray-800">System Health</h2>
+                <p class="text-gray-600 mt-2">Monitor system performance and stability.</p>
+                <canvas id="healthChart"></canvas>
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- Chart.js (For Data Visualizations) -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const ctx1 = document.getElementById("engagementChart").getContext("2d");
+        const ctx2 = document.getElementById("uploadsChart").getContext("2d");
+        const ctx3 = document.getElementById("healthChart").getContext("2d");
+
+        new Chart(ctx1, {
+            type: "line",
+            data: {
+                labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
+                datasets: [{ 
+                    label: "User Engagement", 
+                    data: [10, 25, 40, 35, 50, 60], 
+                    backgroundColor: "rgba(75, 192, 192, 0.2)",
+                    borderColor: "rgba(75, 192, 192, 1)", 
+                    borderWidth: 2 
+                }]
+            }
+        });
+
+        new Chart(ctx2, {
+            type: "bar",
+            data: {
+                labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
+                datasets: [{ 
+                    label: "Uploads", 
+                    data: [5, 15, 10, 20, 25, 30], 
+                    backgroundColor: "rgba(255, 99, 132, 0.2)", 
+                    borderColor: "rgba(255, 99, 132, 1)", 
+                    borderWidth: 2 
+                }]
+            }
+        });
+
+        new Chart(ctx3, {
+            type: "doughnut",
+            data: {
+                labels: ["CPU Usage", "Memory Usage", "Network Traffic"],
+                datasets: [{ 
+                    data: [40, 35, 25], 
+                    backgroundColor: ["#ffcc00", "#ff6600", "#66b2ff"]
+                }]
+            }
+        });
+    });
+</script>
+
+{% endblock %}
