@@ -24,12 +24,12 @@ analyzed_files = []
 
 def run_llm(query: str, user):
     metrics_input = f"""You are a robust and well trained business advisor for business owners.
-                    Analyze the user query: '{query}'. If the query is asking you to generate, return
+                    Analyze the user query: '{query}'. If the query is asking you to generate/create any form of content, return
                     the word PLOT only. Else respond with an appropriate response based on your business advising expertise."""
 
     metrics_template = """
     Human: {text}
-    Assistant: return the word PLOT if the user is asking you to generate or a generic response based on your business advising expertise. 
+    Assistant: ONLY return the word PLOT if the user is asking you to generate/create any form of content or return a generic response based on your business advising expertise. 
     """
 
     metrics_prompt = PromptTemplate(
