@@ -22,12 +22,14 @@ from django.core.files.storage import default_storage
 from django.db import connection
 
 import datetime
-from django.http import JsonResponse
+from django.http import JsonResponsefrom django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from .chatty import run_llm
 from .business_idea_analysis import run_idea
 
-from .business import run_business_analysis
+from .business import run_business_analysisfrom .business_idea_analysis import run_idea
+
+
 
 # Replace Ollama with Hugging Face LLM
 llm = pipeline("text-generation", model="gpt2")
