@@ -42,20 +42,20 @@ def run_llm(query: str, user):
     qa1 = LLMChain(llm=llm, prompt=metrics_prompt)
     result1 = qa1.generate([{"text": metrics_input}])
     output = result1.generations[0][0].text
-    
-    # Iterate through the user's files
-    for f in user.files.all():
-        if f.file_name not in analyzed_files:
-            analyzed_files.append(f.file_name)
-        else:
-            continue
-        file_path = 'turbo/media/uploads/' + f.file_name
-        file_dict = analyze_keys(file_path)  # Ensure this function is imported/defined
-        for key, val in file_dict.items():
-            if key in master_dict and not master_dict[key]:
-                master_dict[key].append(f.file_name)
-                master_dict[key].append(val)
-    key_list = [key for key, value in master_dict.items() if value != []]
-    output = determine_and_call_analytics(query, key_list)        
+    if output == "PLOT":
+        # Iterate through the user's files
+        for f in user.files.all():
+            if f.file_name not in analyzed_files:
+                analyzed_files.append(f.file_name)
+            else:
+                continue
+            file_path = 'media/uploads/' + f.file_name
+            file_dict = analyze_keys(file_path)  # Ensure this function is imported/defined
+            for key, val in file_dict.items():
+                if key in master_dict and not master_dict[key]:
+                    master_dict[key].append(f.file_name)
+                    master_dict[key].append(val)
+        key_list = [key for key, value in master_dict.items() if value != []]
+        output = determine_and_call_analytics(query, key_list)        
         
     return output
