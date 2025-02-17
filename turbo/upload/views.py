@@ -25,7 +25,6 @@ from django.db import connection
 
 import datetime
 from django.http import JsonResponse
-from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from .chatty import run_llm
 from .business_idea_analysis import run_idea
