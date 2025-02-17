@@ -19,11 +19,12 @@ import sys
 from .file_handling import create_file_record
 from django.core.files.storage import default_storage
 
-from django.db import connection
+from django.http import JsonResponse
+from get_keys_from_json import analyze_keys
 
 from django.db import connection
+
 import datetime
-
 
 
 # Replace Ollama with Hugging Face LLM
@@ -339,9 +340,21 @@ def query_documents(request):
     return render(request, "query_documents.html")
 
 
-
-
-
+def keys_from_json(request):
+    master_dict = {
+        'Total Sales': [], 'Gross Sales': [], 'Net Sales': [], 'Total Orders': [], 'Discounts': [],
+        'Returns': [], 'Shipping': [], 'customer_id': [], 'product_id': [], 'quantity': [],
+        'date': [], 'Year': [], 'Month': [], 'cost_price': [], 'stock_level': [], 'expiry_date': []
+    }
+    # Assuming user.files gives you the File objects
+    for f in request.user.files.all():
+        file_path = 'turbo/media/uploads/' + f.file_name
+        file_dict = analyze_keys(file_path)  # Make sure analyze_keys is imported/defined
+        for key, val in file_dict.items():
+            if key in master_dict and master_dict[key] == []:
+                master_dict[key].append(f.file_name)
+                master_dict[key].append(val)
+    return JsonResponse(master_dict)
 
 
 
