@@ -22,10 +22,12 @@ from django.core.files.storage import default_storage
 from django.db import connection
 
 import datetime
-
+from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from .chatty import run_llm
+from .business_idea_analysis import run_idea
 
+from .business import run_business_analysis
 
 # Replace Ollama with Hugging Face LLM
 llm = pipeline("text-generation", model="gpt2")
@@ -123,7 +125,7 @@ def upload_file(request):
             
             # Determine the path to the saved file
             file_path = os.path.join(default_storage.location, 'uploads', file_name)
-            print("file_path", file_path)
+            #print("file_path", file_path)
             # Extract text based on file type
             if file_name.endswith(".pdf"):
                 # Process PDF file by reading from the file path
@@ -142,7 +144,7 @@ def upload_file(request):
                 messages.error(request, "Unsupported file format")
                 return render(request, "upload/home.html")
 
-            print(documents[:10])  # Print the first few documents for debugging
+            #print(documents[:10])  # Print the first few documents for debugging
             # Validate metadata size before uploading
             for doc in documents:
                 metadata_size = sys.getsizeof(doc.metadata)
@@ -177,64 +179,87 @@ def upload_file(request):
 
 
 
+# def generate_idea(request):
+#     index_name = "resumes"
+#     if request.method == "POST" and request.FILES.get("uploaded_file"):
+#         uploaded_file = request.FILES["uploaded_file"]
+#         file_name = uploaded_file.name.lower()
+
+#         # Initialize variables
+#         documents = []
+
+#         try:
+#             # Create the file record and save the file
+#             file_record = create_file_record(request.user, uploaded_file, file_name)
+            
+#             # Determine the path to the saved file
+#             file_path = os.path.join(default_storage.location, 'uploads', file_name)
+#             #print("file_path", file_path)
+#             # Extract text based on file type
+#             if file_name.endswith(".pdf"):
+#                 # Process PDF file by reading from the file path
+#                 with open(file_path, 'rb') as file:
+#                     text = load_pdf(file)
+#                 # Split text into chunks and convert to Document objects
+#                 documents = split_text_into_documents(text, source=file_name)
+#             else:
+#                 messages.error(request, "Unsupported file format")
+#                 return render(request, "upload/resume.html")
+
+#             #print(documents[:10])  # Print the first few documents for debugging
+#             # Validate metadata size before uploading
+#             for doc in documents:
+#                 metadata_size = sys.getsizeof(doc.metadata)
+#                 if metadata_size > 40960:  # 40 KB limit
+#                     messages.error(request, f"Metadata size exceeds limit: {metadata_size} bytes")
+#                     return render(request, "upload/resume.html")
+
+#             # Generate embeddings and store in Pinecone using LangChain's PineconeVectorStore
+#             try:
+#                 vectorstore = PineconeVectorStore.from_documents(
+#                     documents=documents,
+#                     embedding=embedding_model,
+#                     index_name=index_name
+#                 )
+#                 messages.success(request, "File uploaded successfully!")
+#                 return redirect("generate")
+#             except Exception as e:
+#                 messages.error(request, f"Failed to upload to Pinecone: {str(e)}")
+#                 return redirect("generate")  # Redirect to home page if error occurs in Pinecone upload
+
+
+#             # After successful upload, refresh the recent files list
+#             recent_files = update_file_list(request)
+#             return render()
+        
+#         except Exception as e:
+#             messages.error(request, f"An error occurred: {str(e)}")
+#             return redirect("generate")  # Redirect to home page if any error occurs
+
+#         return render(request, "upload/home.html")
+
+#     return render(request, "upload/resume.html")
+
+
 def generate_idea(request):
-    index_name = "resumes"
     if request.method == "POST" and request.FILES.get("uploaded_file"):
         uploaded_file = request.FILES["uploaded_file"]
         file_name = uploaded_file.name.lower()
-
-        # Initialize variables
-        documents = []
+        file_path = os.path.join(default_storage.location, 'uploads', file_name)
 
         try:
-            # Create the file record and save the file
+            # Save the file record and extract file path
             file_record = create_file_record(request.user, uploaded_file, file_name)
             
-            # Determine the path to the saved file
-            file_path = os.path.join(default_storage.location, 'uploads', file_name)
-            #print("file_path", file_path)
-            # Extract text based on file type
-            if file_name.endswith(".pdf"):
-                # Process PDF file by reading from the file path
-                with open(file_path, 'rb') as file:
-                    text = load_pdf(file)
-                # Split text into chunks and convert to Document objects
-                documents = split_text_into_documents(text, source=file_name)
-            else:
-                messages.error(request, "Unsupported file format")
-                return render(request, "upload/resume.html")
+            ai_response = run_business_analysis(file_path)
 
-            #print(documents[:10])  # Print the first few documents for debugging
-            # Validate metadata size before uploading
-            for doc in documents:
-                metadata_size = sys.getsizeof(doc.metadata)
-                if metadata_size > 40960:  # 40 KB limit
-                    messages.error(request, f"Metadata size exceeds limit: {metadata_size} bytes")
-                    return render(request, "upload/resume.html")
+            # Store response in session
+            request.session["business_idea"] = ai_response
 
-            # Generate embeddings and store in Pinecone using LangChain's PineconeVectorStore
-            try:
-                vectorstore = PineconeVectorStore.from_documents(
-                    documents=documents,
-                    embedding=embedding_model,
-                    index_name=index_name
-                )
-                messages.success(request, "File uploaded successfully!")
-                return redirect("generate")
-            except Exception as e:
-                messages.error(request, f"Failed to upload to Pinecone: {str(e)}")
-                return redirect("generate")  # Redirect to home page if error occurs in Pinecone upload
+            return JsonResponse({"response": ai_response})  # Return AI response as JSON
 
-
-            # After successful upload, refresh the recent files list
-            recent_files = update_file_list(request)
-            return render()
-        
         except Exception as e:
-            messages.error(request, f"An error occurred: {str(e)}")
-            return redirect("generate")  # Redirect to home page if any error occurs
-
-        return render(request, "upload/home.html")
+            return JsonResponse({"error": str(e)})
 
     return render(request, "upload/resume.html")
 
@@ -245,7 +270,7 @@ def update_file_list(request):
         username = request.user.username
 
         # Debugging: Print the username
-        print(f"Logged-in username: {username}")
+        #print(f"Logged-in username: {username}")
 
         # Get user_id from auth_user table
         with connection.cursor() as cursor:
@@ -273,7 +298,7 @@ def update_file_list(request):
 
         # Format the result into a list of dictionaries
         recent_files = [{"file_name": file[0], "uploaded_at": file[1]} for file in files]
-        print('recent files',recent_files)
+        #print('recent files',recent_files)
         return recent_files
 
     except Exception as e:
@@ -284,7 +309,7 @@ def home(request):
     recent_files = update_file_list(request)  # Get the 5 most recently uploaded files
 
     # Debugging: Check if recent_files has been fetched
-    print(f"Recent Files: {recent_files}")
+    #print(f"Recent Files: {recent_files}")
 
     if isinstance(recent_files, dict):  # In case of error, pass it to the template
         messages.error(request, f"Error fetching recent files: {recent_files.get('error')}")
@@ -376,7 +401,7 @@ def query_documents(request):
         if not file_names:
             return render(request, "upload/query_documents.html", {"error": "No files found for this user"})
 
-        print(file_names)
+        #print(file_names)
 
         # Convert query to an embedding
 
@@ -394,7 +419,7 @@ def chatbot_view(request):
             data = json.loads(request.body)
             user_message = data.get("message", "")
             
-            print("user_message", user_message)
+            #print("user_message", user_message)
             if user_message:
                 response = run_llm(user_message, request.user)
                 return JsonResponse({"response": response})
@@ -410,6 +435,22 @@ def dashboard(request):
 
 def evaluate(request):
     return render(request, "upload/evaluate.html")
+
+def process_idea(request):
+
+    if request.method == 'POST':
+        # Retrieve form data
+        print('REQYESTTTT',request)
+        breakpoint
+        idea_name = request.POST.get('idea_name')
+        idea_text = request.POST.get('idea_text')
+        industry = request.POST.get('industry')
+
+        # Call your Python function with the form data // returns metric values
+        metrics  = run_idea(idea_name, idea_text, industry)
+        # Pass the metrics to the template
+        return render(request, 'upload/llamafinal.html', {'metrics': metrics})
+    
 
 
 
