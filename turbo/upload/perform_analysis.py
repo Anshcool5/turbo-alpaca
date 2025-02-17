@@ -23,7 +23,7 @@ def determine_and_call_analytics(query: str, master_dict: dict):
 
     metrics_template = """
     Human: {text}
-    Assistant: return the metric function in the same format or NO 
+    Assistant: ONLY return the metric function in the same format or NO 
     """
 
     metrics_prompt = PromptTemplate(
@@ -36,9 +36,14 @@ def determine_and_call_analytics(query: str, master_dict: dict):
     qa1 = LLMChain(llm=llm, prompt=metrics_prompt)
     result1 = qa1.generate([{"text": metrics_input}])
     output = result1.generations[0][0].text
-    if output in metric_funcs:
+    if "</think>" in output:
+        after_think = output.split("</think>")[1].strip()  # Split and take the part after </think>
+    else:
+        after_think = "" 
+    output = after_think
+    if after_think in metric_funcs:
         output = "Sure thing, I'll be generating your plots based on your shared files!"
-        data = pd.read_json(metric_funcs[output])
+        data = pd.read_json('media/uploads/' + metric_funcs[output])
         calc_func_output = FUNCTIONS[output](data)
         output = "\nDone!"
 
@@ -78,7 +83,20 @@ def available_functions_from_metrics(available_metrics):
     
     available = {}
     for func_name, req_metrics in functions_requirements.items():
-        # Check if every required metric is present in the available_metrics list
-        if all(metric in available_metrics.keys() for metric in req_metrics):
-            available[func_name] = [available_metrics[metric][0] for metric in req_metrics if metric in available_metrics]
+        # Ensure every required metric is present
+        if all(metric in available_metrics for metric in req_metrics):
+            values = []
+            for metric in req_metrics:
+                metric_value = available_metrics[metric]
+                # If the value is a list and not empty, use its first element.
+                if isinstance(metric_value, list):
+                    if metric_value:  # non-empty list
+                        values.append(metric_value[0])
+                    else:
+                        # Handle empty list scenario (e.g. append None or skip)
+                        continue
+                else:
+                    # Otherwise, assume it's a direct value.
+                    values.append(metric_value)
+            available[func_name] = values
     return available
