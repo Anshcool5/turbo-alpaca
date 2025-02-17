@@ -79,12 +79,20 @@
         <div class="bg-white rounded-lg shadow-lg p-6 mb-8">
             <h2 class="text-2xl font-semibold text-gray-800 mb-4">Recent Uploads</h2>
             <div class="space-y-4">
-                <!-- Add your recent uploads list here -->
-                <p class="text-gray-600">No recent uploads</p>
+                {% if recent_files %}
+                    <!-- Loop through the files and display them -->
+                    {% for file in recent_files %}
+                        <div class="file-item flex justify-between items-center p-2 border-b border-gray-300">
+                            <span class="text-gray-700">{{ file.file_name }}</span>
+                            <span class="text-gray-500 text-sm">{{ file.uploaded_at|date:"F j, Y, g:i a" }}</span>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="text-gray-600">No recent uploads</p>
+                {% endif %}
             </div>
         </div>
-    </div>
-</div>
+
 
 <!-- Footer with Logout Button -->
 <footer class="bg-white-200 text-center py-6 mt-12">
