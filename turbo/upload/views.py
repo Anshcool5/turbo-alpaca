@@ -29,7 +29,9 @@ from django.views.decorators.csrf import csrf_exempt
 from .chatty import run_llm
 from .business_idea_analysis import run_idea
 
-from .business import run_business_analysis
+from .business_idea_analysis import run_idea
+
+
 
 from .parser import parse_business_idea
 
