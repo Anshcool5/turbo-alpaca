@@ -3,10 +3,15 @@ from . import views
 from django.contrib.auth import views as auth_views
 
 
+
 urlpatterns = [
     path('', views.user_login, name='login'),  # User login
     #path('', views.home, name='home'),  # Home page
     path('upload/', views.upload_file, name='upload_file'),  # File upload view
+    
+    # ... your other URL patterns ...
+    path('generate_plot/', views.dashboard, name='generate_plot'),
+
 
     # Password Reset URLs
     path('password_reset/', auth_views.PasswordResetView.as_view(template_name='password_reset.html'), name='password_reset'),
@@ -23,6 +28,7 @@ urlpatterns = [
     path("query_documents/", views.query_documents, name="query_documents"),
     path("chatty/", views.chatbot_view, name="chatty"),
     path("resume/", views.upload_resume, name="resume"),
+    
     # Dashboard
     path("dashboard/", views.dashboard, name="dashboard")
 
