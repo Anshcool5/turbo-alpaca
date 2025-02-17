@@ -19,6 +19,10 @@ import sys
 from .file_handling import create_file_record
 from django.core.files.storage import default_storage
 
+from django.db import connection
+
+from django.db import connection
+
 
 
 # Replace Ollama with Hugging Face LLM
@@ -214,33 +218,74 @@ def test_email(request):
     except Exception as e:
         return HttpResponse(f"Error: {e}")
 
-#query documents
+
+
 def query_documents(request):
     if request.method == "POST":
         query_text = request.POST.get("query")
         if not query_text:
-            return JsonResponse({"error": "Query text is required"}, status=400)
+            return render(request, "query_documents.html", {"error": "Query text is required"})
+
+        # Get logged-in username
+        username = request.user.username
+
+        # Get user_id from auth_user table
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT id FROM auth_user WHERE username = %s", [username])
+            user_row = cursor.fetchone()
+
+        if not user_row:
+            return render(request, "query_documents.html", {"error": "User not found in database"})
+
+        user_id = user_row[0]  # Extract user ID
+
+        # Get filenames from upload_file table, excluding .json files
+        with connection.cursor() as cursor:
+            cursor.execute(
+                "SELECT file_name FROM upload_file WHERE user_id = %s AND LOWER(file_name) NOT LIKE %s AND LOWER(file_name) LIKE %s", 
+                [user_id, '%json', f'%{query_text}%']
+            )
+            files = cursor.fetchall()
+
+        file_names = [file[0] for file in files]  # Extract filenames
+
+        if not file_names:
+            return render(request, "query_documents.html", {"error": "No files found for this user"})
+
+        print(file_names)
 
         # Convert query to an embedding
         query_embedding = embedding_model.embed_query(query_text)  # Shape: (384,)
 
-        # Search in Pinecone
-        search_results = index.query(vector=query_embedding, top_k=5, include_metadata=True)
-
-        # Extract matching documents
+        # Query Pinecone using the retrieved filenames
         matches = []
-        if "matches" in search_results:
-            matches = [
-                {
-                    "score": match["score"],
-                    "text": match["metadata"].get("source", "No source available")  # Avoid KeyError
-                }
-                for match in search_results["matches"]
-            ]
+        for file_name in file_names:
+            # Perform Pinecone query for each file that was returned by SQL query
+            search_results = index.query(vector=query_embedding, top_k=5, include_metadata=True)
 
+            if "matches" in search_results:
+                # Filter Pinecone results to only include the filenames that are in the list
+                for match in search_results["matches"]:
+                    if "metadata" in match and match["metadata"].get("source") in file_names:
+                        matches.append(
+                            {
+                                "score": match["score"],
+                                "text": match["metadata"].get("source", "No source available")
+                            }
+                        )
+
+        # Render the results on the query_documents page
         return render(request, "query_documents.html", {"results": matches})
 
     return render(request, "query_documents.html")
+
+
+
+
+
+
+
+
 
 
 
