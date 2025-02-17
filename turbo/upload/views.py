@@ -402,6 +402,9 @@ def chatbot_view(request):
     
     return JsonResponse({"response": "Invalid request method."})
 
+def dashboard(request):
+    return render(request, "upload/dashboard.html")
+
 
 
 
