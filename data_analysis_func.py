@@ -333,30 +333,31 @@ def plot_correlation_heatmap(sales_df):
 
 
 # Run forecast using XGBoost model
-fig_xgb, rmse_xgb, r2_xgb, forecast_xgb_df = forecast_sales_xgboost(data, periods=30)
+# fig_xgb, rmse_xgb, r2_xgb, forecast_xgb_df = forecast_sales_xgboost(data, periods=30)
 
-# Run forecast using Prophet model
-fig_prophet, forecast_prophet_df = forecast_sales_prophet(data, periods=30)
+# # Run forecast using Prophet model
+# fig_prophet, forecast_prophet_df = forecast_sales_prophet(data, periods=30)
 
-# Combine the Prophet and XGBoost forecasts
-fig_combined, combined_df = combine_forecasts(forecast_prophet_df, forecast_xgb_df)
+# # Combine the Prophet and XGBoost forecasts
+# fig_combined, combined_df = combine_forecasts(forecast_prophet_df, forecast_xgb_df)
 
-# Display the combined forecast figure
-fig_combined.show()
+# # Display the combined forecast figure
+# fig_combined.show()
+
 
 
 
 # use output to store the results of the analysis and feed the dictionary to the chroma API
-output = {
-    "Total Revenue": calculate_total_revenue(data),
-    "Profit Margin": calculate_profit_margin(data),
-    "Number of Transactions": calculate_number_of_transactions(data),
-    "Average Sale Value": calculate_average_sale_value(data),
-    "Peak Sales Period": calculate_peak_sales_period(data),
-    "Seasonal Fluctuations": calculate_seasonal_fluctuations(data),
-    "XGBoost RMSE": rmse_xgb,
-    "XGBoost R2": r2_xgb,
-    "Forecast XGBoost Data": forecast_xgb_df.to_dict(orient="records"),
-    "Forecast Prophet Data": forecast_prophet_df.to_dict(orient="records"),
-    "Combined Forecast Data": combined_df.to_dict(orient="records")
-}
+# output = {
+#     "Total Revenue": calculate_total_revenue(data),
+#     "Profit Margin": calculate_profit_margin(data),
+#     "Number of Transactions": calculate_number_of_transactions(data),
+#     "Average Sale Value": calculate_average_sale_value(data),
+#     "Peak Sales Period": calculate_peak_sales_period(data),
+#     "Seasonal Fluctuations": calculate_seasonal_fluctuations(data),
+#     "XGBoost RMSE": rmse_xgb,
+#     "XGBoost R2": r2_xgb,
+#     "Forecast XGBoost Data": forecast_xgb_df.to_dict(orient="records"),
+#     "Forecast Prophet Data": forecast_prophet_df.to_dict(orient="records"),
+#     "Combined Forecast Data": combined_df.to_dict(orient="records")
+# }

@@ -314,24 +314,6 @@ def query_documents(request):
         print(file_names)
 
         # Convert query to an embedding
-        query_embedding = embedding_model.embed_query(query_text)  # Shape: (384,)
-
-        # Query Pinecone using the retrieved filenames
-        matches = []
-        for file_name in file_names:
-            # Perform Pinecone query for each file that was returned by SQL query
-            search_results = index.query(vector=query_embedding, top_k=5, include_metadata=True)
-
-            if "matches" in search_results:
-                # Filter Pinecone results to only include the filenames that are in the list
-                for match in search_results["matches"]:
-                    if "metadata" in match and match["metadata"].get("source") in file_names:
-                        matches.append(
-                            {
-                                "score": match["score"],
-                                "text": match["metadata"].get("source", "No source available")
-                            }
-                        )
 
         # Render the results on the query_documents page
         return render(request, "upload/query_documents.html", {"results": matches})
