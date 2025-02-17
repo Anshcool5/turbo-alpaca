@@ -1,0 +1,40 @@
+{% extends 'upload/base.html' %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50">
+    <div class="text-center py-12">
+        <h1 class="text-4xl font-bold text-gray-900 sm:text-5xl">
+            Resume upload
+        </h1>
+    </div>
+
+    <!-- Main Content Section -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Enlarged Quick Upload Card -->
+        <div class="bg-white rounded-lg shadow-lg p-10 mb-12 max-w-3xl mx-auto">
+            <h2 class="text-3xl font-semibold text-gray-800 mb-6">Quick Upload</h2>
+            <form action="{% url 'upload_file' %}" method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="flex flex-col space-y-4">
+                    <input type="file" 
+                           name="uploaded_file" 
+                           class="block w-full text-sm text-gray-500
+                                  file:mr-4 file:py-3 file:px-5
+                                  file:rounded-full file:border-0
+                                  file:text-sm file:font-medium
+                                  file:bg-indigo-50 file:text-indigo-700
+                                  hover:file:bg-indigo-100">
+                    <button type="submit" 
+                            class="px-6 py-3 bg-indigo-600 text-white rounded-lg
+                                   hover:bg-indigo-700 transition-colors text-lg font-semibold">
+                        Upload
+                    </button>
+                </div>
+            </form>
+        </div>
+
+{% endblock %}
+
+
