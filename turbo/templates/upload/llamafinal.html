@@ -1,106 +1,71 @@
+{% extends 'upload/base.html' %}
 {% load static %}
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Llama ClipPath Example</title>
-  <style>
-    /* A container to stack the images and SVG on top of each other */
-    #llama-container {
-      position: relative;
-      width: 300px;
-      height: 300px;
-      margin: 50px auto; /* center on page */
-      border: 1px solid #ccc;
-    }
-    /* Black-and-white llama at the bottom */
-    #llama-bw {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 300px;
-      height: 300px;
-      z-index: 1;
-    }
-    /* SVG (with clipped coloured llama) on top */
-    #llama-svg {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 300px;
-      height: 300px;
-      z-index: 2;
-    }
-  </style>
-</head>
-<body>
 
-<h2>Fill the Coloured Llama Above the Black-and-White Llama</h2>
+{% block title %}Evaluate Metrics{% endblock %}
 
-<div id="llama-container">
-  <!-- 1) Black-and-white llama background -->
-  <img 
-    id="llama-bw" 
-    src="{% static 'images/llama_bw.png' %}" 
-    alt="Black and White Llama" 
-  />
+{% block content %}
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-10">
+        <div class="bg-white rounded-lg shadow-lg p-10 max-w-3xl mx-auto relative">
+            <h1 class="text-4xl font-bold text-blue-600 text-center mb-6">Here is a thorough analysis of your idea</h1>
+            <div id="llama-container" class="relative w-72 h-72 mx-auto border-2 border-gray-300 rounded-lg flex items-center justify-center">
+                <img id="llama-bw" src="{% static 'images/llama_bw.png' %}" alt="Black and White Llama" class="absolute w-64 h-64" />
+                <svg id="llama-svg" width="300" height="300" viewBox="0 0 300 300" class="absolute">
+                    <defs>
+                        <clipPath id="metricClip">
+                            <polygon id="metricPolygon" points="150,50 220,130 190,220 110,220 80,130" />
+                        </clipPath>
+                    </defs>
+                    <image href="{% static 'images/llama_color.png' %}" x="0" y="0" width="300" height="300" clip-path="url(#metricClip)" />
+                </svg>
+            </div>
+        </div>
+    </div>
 
-  <!-- 2) SVG that clips the coloured llama to a 5-point polygon -->
-  <svg id="llama-svg" width="300" height="300" viewBox="0 0 300 300">
-    <defs>
-      <clipPath id="metricClip">
-        <!-- Polygon (initially a dummy shape); we'll update via JS -->
-        <polygon id="metricPolygon" points="150,50 220,130 190,220 110,220 80,130" />
-      </clipPath>
-    </defs>
+    <script>
+        const metrics = {{ metrics|safe }};
+        const box = document.getElementById('llama-container').getBoundingClientRect();
+        const centerX = box.width / 2;
+        const centerY = box.height / 2;
+        const maxRadius = 100;
+        const angleStep = (2 * Math.PI) / Object.keys(metrics).length;
 
-    <!-- Coloured llama, clipped by the polygon -->
-    <image 
-      href="{% static 'images/llama_color.png' %}"
-      x="0" 
-      y="0" 
-      width="300" 
-      height="300" 
-      clip-path="url(#metricClip)" 
-    />
-  </svg>
-</div>
+        function updatePolygonPoints(metrics) {
+            let pointsArray = [];
+            let labels = [];
 
-<script>
-  /*
-    5 metrics, each 0–100.
-    If all are 100, the polygon will cover the entire image (full radius).
-  */
-  const metrics = {{ metrics|safe }};  // Ensure the metrics are safely passed as JSON
+            Object.entries(metrics).forEach(([key, value], i) => {
+                let radius = (parseInt(value) / 10) * maxRadius;
+                let angle = i * angleStep - Math.PI / 2;
+                let x = centerX + radius * Math.cos(angle);
+                let y = centerY + radius * Math.sin(angle);
+                pointsArray.push(`${x},${y}`);
+                
+                let labelX = x + (x > centerX ? 20 : -60);
+                let labelY = y + (y > centerY ? 10 : -20);
+                
+                labels.push({x: labelX, y: labelY, text: `${key}: ${value}/10`});
+            });
 
-  // Centre of the SVG
-  const centerX = 150;
-  const centerY = 150;
+            document.getElementById('metricPolygon').setAttribute('points', pointsArray.join(' '));
+            document.querySelectorAll('.metric-label').forEach(el => el.remove());
+            
+            labels.forEach(label => {
+                let div = document.createElement('div');
+                div.className = 'metric-label absolute bg-white text-indigo-600 text-xs p-1 rounded border border-gray-300 shadow-sm';
+                div.style.transform = 'translate(-50%, -50%)';
+                div.style.position = 'absolute';
+                div.style.left = `${label.x+10}px`;
+                div.style.top = `${label.y-10}px`;
+                div.innerText = label.text;
+                document.getElementById('llama-container').appendChild(div);
+            });
+        }
+        updatePolygonPoints(metrics);
+    </script>
+{% endblock %}
 
-  // Max radius: ~212 covers corners of a 300×300 (distance from centre (150,150) to corner (0,0))
-  const maxRadius = 212;
 
-  // Angle between points (for 5 metrics => 72° each)
-  const angleStep = (2 * Math.PI) / metrics.length;
 
-  // Calculate new polygon points based on metrics
-  function updatePolygonPoints(metrics) {
-    let pointsArray = [];
-     metrics.forEach((value, i) => {
-      // Scale each metric to a radius (0–212)
-      let radius = (value / 100) * maxRadius;
-      // Start from top (-90° offset), then move around 72° each
-      let angle = i * angleStep - Math.PI / 2;
-      let x = centerX + radius * Math.cos(angle);
-      let y = centerY + radius * Math.sin(angle);
-      pointsArray.push(`${x},${y}`);
-    });
-    return pointsArray.join(' ');
-  }
 
-  // Update the polygon with the new coordinates
-  const polygon = document.getElementById('metricPolygon');
-  polygon.setAttribute('points', updatePolygonPoints(metrics));
-</script>
 
-</body>
-</html>
+
