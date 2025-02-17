@@ -18,6 +18,25 @@
                     <image href="{% static 'images/llama_color.png' %}" x="0" y="0" width="300" height="300" clip-path="url(#metricClip)" />
                 </svg>
             </div>
+
+            <!-- Display the Descriptions Below the Image -->
+            <div class="mt-8">
+                <h2 class="text-2xl font-semibold text-blue-600 mb-4">Additional Insights</h2>
+                <div class="space-y-4">
+                    {% for item in descript %}
+                        <div class="bg-indigo-100 p-4 rounded-lg shadow-md">
+                            {% for key, value in item.items %}
+                                <div class="mb-2">
+                                    <span class="font-semibold text-indigo-600">{{ key }}:</span>
+                                    <span class="text-gray-800">{{ value }}</span>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% empty %}
+                        <p class="text-gray-500">No additional insights available at this time.</p>
+                    {% endfor %}
+                </div>
+            </div>
         </div>
     </div>
 
@@ -33,17 +52,20 @@
             let pointsArray = [];
             let labels = [];
 
-            Object.entries(metrics).forEach(([key, value], i) => {
+            metrics.forEach((metric, i) => {
+                const key = Object.keys(metric)[0];
+                const value = metric[key];
+                
                 let radius = (parseInt(value) / 10) * maxRadius;
                 let angle = i * angleStep - Math.PI / 2;
                 let x = centerX + radius * Math.cos(angle);
                 let y = centerY + radius * Math.sin(angle);
                 pointsArray.push(`${x},${y}`);
-                
+            
                 let labelX = x + (x > centerX ? 20 : -60);
                 let labelY = y + (y > centerY ? 10 : -20);
-                
-                labels.push({x: labelX, y: labelY, text: `${key}: ${value}/10`});
+            
+                labels.push({ x: labelX, y: labelY, text: `${key}: ${value}/10` });
             });
 
             document.getElementById('metricPolygon').setAttribute('points', pointsArray.join(' '));
@@ -63,9 +85,3 @@
         updatePolygonPoints(metrics);
     </script>
 {% endblock %}
-
-
-
-
-
-

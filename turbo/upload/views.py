@@ -30,6 +30,7 @@ from .chatty import run_llm
 from .business_idea_analysis import run_idea
 
 from .business_idea_analysis import run_idea
+from .business import run_business_analysis
 
 
 
@@ -477,16 +478,17 @@ def process_idea(request):
 
     if request.method == 'POST':
         # Retrieve form data
-        print('REQYESTTTT',request)
-        breakpoint
+        #print('REQYESTTTT',request)
+        
         idea_name = request.POST.get('idea_name')
         idea_text = request.POST.get('idea_text')
         industry = request.POST.get('industry')
 
         # Call your Python function with the form data // returns metric values
-        metrics  = run_idea(idea_name, idea_text, industry)
+        metrics, descript  = run_idea(idea_name, idea_text, industry)
         # Pass the metrics to the template
-        return render(request, 'upload/llamafinal.html', {'metrics': metrics})
+        # print("metrics is metricing", metrics)
+        return render(request, 'upload/llamafinal.html', {'metrics': metrics, "descript": descript})
     
 
 def dashboard(request):
