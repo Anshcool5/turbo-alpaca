@@ -9,6 +9,7 @@ venv/
 
 # Django-specific
 *db.sqlite3  # Ignore SQLite database (if using SQLite)
+*/db.sqlite3
 **/db.sqlite3
 instance/
 media/  

@@ -5,7 +5,14 @@ from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_community.document_loaders import JSONLoader
 import chromadb
 from chromadb.api import Embeddings
-from pprint import pprint
+from langchain_groq import ChatGroq
+from langchain.chains import RetrievalQA
+from dotenv import load_dotenv
+import os
+
+# Load environment variables from .env file
+load_dotenv()
+groq_api_key = os.getenv("GROQ_API_KEY")
 
 # Initialize HuggingFaceEmbeddings with a specific model
 ef = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")  # Explicitly specify the model name
@@ -35,7 +42,7 @@ documents = text_splitter.split_documents(loaded_documents)
 print(f"Number of documents: {len(documents)}")
 
 loader = JSONLoader(
-    file_path='data_for_chroma/business.retailsales.json',
+    file_path='data_for_chroma/business.retailsales2.json',
     jq_schema=".",  # Load the entire JSON structure
     text_content=False
 )
@@ -74,10 +81,18 @@ chroma = Chroma(client=client, collection_name="RetailSales", embedding_function
 retriever = chroma.as_retriever(k=5, search_type="mmr")
 
 # Test query
-query = "What are the sales trends for retail businesses?"
-results = retriever.get_relevant_documents(query)
+#query = "What are the sales trends for retail businesses?"
+#results = retriever.get_relevant_documents(query)
 
 # Step 12: Display Query Results
-print("Query Results:")
-for result in results:
-    print(result.page_content)
+#print("Query Results:")
+#for result in results:
+#    print(result.page_content)
+llm = ChatGroq(temperature=0, model_name="deepseek-r1-distill-llama-70b", groq_api_key=groq_api_key)
+
+question = "Can you perform a sales forecast on this data for my business?"
+
+qa2 = RetrievalQA.from_chain_type(llm, retriever=retriever, chain_type="stuff")
+result2 = qa2({"query": question})
+print(result2['result'])
+
