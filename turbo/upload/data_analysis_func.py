@@ -4,9 +4,7 @@ import numpy as np
 
 # Data visualization
 import matplotlib.pyplot as plt
-import seaborn as sns
 
-import streamlit as st
 import pandas as pd
 import numpy as np
 import plotly.express as px
@@ -18,16 +16,9 @@ from datetime import datetime, timedelta
 from prophet import Prophet
 from sklearn.cluster import KMeans
 from statsmodels.tsa.seasonal import seasonal_decompose
-from sklearn.ensemble import IsolationForest
-from mlxtend.frequent_patterns import apriori, association_rules
 
 # New advanced libraries
 import nltk
-from nltk.sentiment import SentimentIntensityAnalyzer
-from sklearn.model_selection import train_test_split
-from xgboost import XGBRegressor
-from sklearn.metrics import mean_squared_error, r2_score
-from sklearn.preprocessing import LabelEncoder, MinMaxScaler
 
 import os
 from django.conf import settings
@@ -517,7 +508,26 @@ def plot_correlation_heatmap(corr_matrix):
     fig = px.imshow(corr_matrix, text_auto=True, title="Correlation Heatmap: Sales Metrics")
     return save_plotly_figure(fig, "correlation_heatmap")
 
-
+FUNCTIONS = {
+    "calculate_total_revenue_data": calculate_total_revenue_data,
+    "calculate_profit_margin_data": calculate_profit_margin_data,
+    "calculate_number_of_transactions_data": calculate_number_of_transactions_data,
+    "calculate_peak_sales_period_data": calculate_peak_sales_period_data,
+    "calculate_seasonal_fluctuations_data": calculate_seasonal_fluctuations_data,
+    "calculate_customer_churn_data": calculate_customer_churn_data,
+    "get_best_sellers_data": get_best_sellers_data,
+    "get_worst_sellers_data": get_worst_sellers_data,
+    "get_stock_levels_data": get_stock_levels_data,
+    "forecast_stock_data": forecast_stock_data,
+    "suggest_stock_ordering_data": suggest_stock_ordering_data,
+    "calculate_stock_valuation_data": calculate_stock_valuation_data,
+    "check_stock_expiry_data": check_stock_expiry_data,
+    "calculate_stock_returns_data": calculate_stock_returns_data,
+    "forecast_sales_prophet_data": forecast_sales_prophet_data,
+    "get_customer_demographics": get_customer_demographics,
+    "perform_customer_segmentation_data": perform_customer_segmentation_data,
+    "seasonal_decomposition_data": seasonal_decomposition_data
+}
 
 # =========================
 # TESTING CODE
