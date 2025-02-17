@@ -18,7 +18,7 @@
         <!-- Quick Upload Card -->
         <div class="bg-white rounded-lg shadow-lg p-6 mb-8">
             <h2 class="text-2xl font-semibold text-gray-800 mb-4">Quick Upload</h2>
-            <form action="{% url 'upload_file' %}" method="POST" enctype="multipart/form-data">
+            <form id="upload-form" action="{% url 'upload_file' %}" method="POST" enctype="multipart/form-data">
                 {% csrf_token %}
                 <div class="flex items-center space-x-4">
                     <input type="file" 
@@ -35,47 +35,48 @@
                         Upload
                     </button>
                 </div>
+                <!-- Llama Reactions Container -->
+                <div id="llama-reactions" style="position: relative; height: 200px; overflow: hidden;"></div>
             </form>
         </div>
 
-            <!-- Document Search Bar (New Section) -->
-            <div class="bg-white rounded-lg shadow-lg p-6 mb-8">
-                <h2 class="text-2xl font-semibold text-gray-800 mb-4">Search Documents</h2>
-                <form action="{% url 'query_documents' %}" method="POST">
-                    {% csrf_token %}
-                    <div class="flex items-center space-x-4">
-                        <input type="text" 
-                                name="query" 
-                                placeholder="Search documents..." 
-                                class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                        <button type="submit" 
-                                class="px-4 py-2 bg-indigo-600 text-white rounded-lg
-                                        hover:bg-indigo-700 transition-colors">
-                            Search
-                        </button>
-                    </div>
-                </form>
-            </div>
+        <!-- Document Search Bar -->
+        <div class="bg-white rounded-lg shadow-lg p-6 mb-8">
+            <h2 class="text-2xl font-semibold text-gray-800 mb-4">Search Documents</h2>
+            <form action="{% url 'query_documents' %}" method="POST">
+                {% csrf_token %}
+                <div class="flex items-center space-x-4">
+                    <input type="text" 
+                            name="query" 
+                            placeholder="Search documents..." 
+                            class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    <button type="submit" 
+                            class="px-4 py-2 bg-indigo-600 text-white rounded-lg
+                                    hover:bg-indigo-700 transition-colors">
+                        Search
+                    </button>
+                </div>
+            </form>
+        </div>
 
-            <!-- Chatbot Interface -->
-            <div class="bg-white rounded-lg shadow-lg p-6 mb-8">
-                <h2 class="text-2xl font-semibold text-gray-800 mb-4">Chatbot</h2>
-                <div class="chatbot-container">
-                    <div class="chatbot-body" id="chatbot-body">
-                        <!-- Chat messages will appear here -->
-                        <div class="chatbot-message chatbot-response">
-                            <p>Hello! How can I assist you today?</p>
-                        </div>
-                    </div>
-                    <div class="chatbot-input">
-                        <input type="text" id="chatbot-input" placeholder="Type your message here..." class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                        <button id="chatbot-send" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">Send</button>
+        <!-- Chatbot Interface -->
+        <div class="bg-white rounded-lg shadow-lg p-6 mb-8">
+            <h2 class="text-2xl font-semibold text-gray-800 mb-4">Chatbot</h2>
+            <div class="chatbot-container">
+                <div class="chatbot-body" id="chatbot-body">
+                    <!-- Chat messages will appear here -->
+                    <div class="chatbot-message chatbot-response">
+                        <p>Hello! How can I assist you today?</p>
                     </div>
                 </div>
+                <div class="chatbot-input">
+                    <input type="text" id="chatbot-input" placeholder="Type your message here..." class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    <button id="chatbot-send" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">Send</button>
+                </div>
             </div>
+        </div>
 
-
-        <!-- Recent Uploads Section (if implementing) -->
+        <!-- Recent Uploads Section -->
         <div class="bg-white rounded-lg shadow-lg p-6 mb-8">
             <h2 class="text-2xl font-semibold text-gray-800 mb-4">Recent Uploads</h2>
             <div class="space-y-4">
@@ -93,177 +94,186 @@
             </div>
         </div>
 
+        <!-- Footer with Logout Button -->
+        <footer class="bg-white-200 text-center py-6 mt-12">
+            <form action="{% url 'logout' %}" method="POST">
+                {% csrf_token %}
+                <button type="submit" 
+                        class="px-4 py-2 bg-red-600 text-white rounded-lg
+                               hover:bg-red-700 transition-colors">
+                    Logout
+                </button>
+            </form>
+        </footer>
+    </div>
 
-<!-- Footer with Logout Button -->
-<footer class="bg-white-200 text-center py-6 mt-12">
-    <form action="{% url 'logout' %}" method="POST">
-        {% csrf_token %}
-        <button type="submit" 
-                class="px-4 py-2 bg-red-600 text-white rounded-lg
-                       hover:bg-red-700 transition-colors">
-            Logout
-        </button>
-    </form>
-</footer>
-</div>
+    <!-- Chatbot Styles -->
+    <style>
+        .chatbot-container {
+            border: 1px solid #e5e7eb;
+            border-radius: 0.5rem;
+            overflow: hidden;
+        }
 
-<!-- Chatbot Styles -->
-<style>
-    .chatbot-container {
-        border: 1px solid #e5e7eb;
-        border-radius: 0.5rem;
-        overflow: hidden;
-    }
+        .chatbot-body {
+            height: 300px;
+            padding: 1rem;
+            overflow-y: auto;
+            background-color: #f9fafb;
+        }
 
-    .chatbot-body {
-        height: 300px;
-        padding: 1rem;
-        overflow-y: auto;
-        background-color: #f9fafb;
-    }
+        .chatbot-message {
+            margin-bottom: 0.75rem;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            max-width: 80%;
+        }
 
-    .chatbot-message {
-        margin-bottom: 0.75rem;
-        padding: 0.5rem 1rem;
-        border-radius: 0.5rem;
-        max-width: 80%;
-    }
+        .chatbot-message p {
+            margin: 0;
+        }
 
-    .chatbot-message p {
-        margin: 0;
-    }
+        .chatbot-response {
+            background-color: #e5e7eb;
+            margin-right: auto;
+        }
 
-    .chatbot-response {
-        background-color: #e5e7eb;
-        margin-right: auto;
-    }
+        .chatbot-user {
+            background-color: #3b82f6;
+            color: white;
+            margin-left: auto;
+        }
 
-    .chatbot-user {
-        background-color: #3b82f6;
-        color: white;
-        margin-left: auto;
-    }
+        .chatbot-input {
+            display: flex;
+            gap: 0.5rem;
+            padding: 1rem;
+            background-color: white;
+            border-top: 1px solid #e5e7eb;
+        }
 
-    .chatbot-input {
-        display: flex;
-        gap: 0.5rem;
-        padding: 1rem;
-        background-color: white;
-        border-top: 1px solid #e5e7eb;
-    }
+        .chatbot-input input {
+            flex: 1;
+            padding: 0.5rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.5rem;
+            outline: none;
+        }
 
-    .chatbot-input input {
-        flex: 1;
-        padding: 0.5rem;
-        border: 1px solid #e5e7eb;
-        border-radius: 0.5rem;
-        outline: none;
-    }
+        .chatbot-input button {
+            padding: 0.5rem 1rem;
+            background-color: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+        }
 
-    .chatbot-input button {
-        padding: 0.5rem 1rem;
-        background-color: #3b82f6;
-        color: white;
-        border: none;
-        border-radius: 0.5rem;
-        cursor: pointer;
-    }
+        .chatbot-input button:hover {
+            background-color: #2563eb;
+        }
 
-    .chatbot-input button:hover {
-        background-color: #2563eb;
-    }
-</style>
+        /* Llama Animation Styles */
+        .llama {
+            position: absolute;
+            font-size: 3rem;
+            opacity: 1;
+            transform: translateY(0);
+            transition: transform 5s ease-out, opacity 5s ease-out;
+        }
+    </style>
 
-<!-- Chatbot JavaScript -->
-
-<script>
-    document.getElementById("chatbot-send").addEventListener("click", function () {
-        sendMessage();
-    });
-
-    document.getElementById("chatbot-input").addEventListener("keypress", function (e) {
-        if (e.key === "Enter") {
+    <!-- Chatbot JavaScript -->
+    <script>
+        document.getElementById("chatbot-send").addEventListener("click", function () {
             sendMessage();
+        });
+
+        document.getElementById("chatbot-input").addEventListener("keypress", function (e) {
+            if (e.key === "Enter") {
+                sendMessage();
+            }
+        });
+
+        function sendMessage() {
+            const input = document.getElementById("chatbot-input");
+            const message = input.value.trim();
+
+            if (message !== "") {
+                // Add user message to chat
+                const userMessage = document.createElement("div");
+                userMessage.classList.add("chatbot-message", "chatbot-user");
+                userMessage.innerHTML = `<p>${message}</p>`;
+                document.getElementById("chatbot-body").appendChild(userMessage);
+
+                // Clear input field
+                input.value = "";
+
+                // Send user input to Django backend
+                fetch("{% url 'chatty' %}", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRFToken": "{{ csrf_token }}"
+                    },
+                    body: JSON.stringify({ message: message })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    // Append chatbot response to chat
+                    const botResponse = document.createElement("div");
+                    botResponse.classList.add("chatbot-message", "chatbot-response");
+                    botResponse.innerHTML = `<p>${data.response}</p>`;
+                    document.getElementById("chatbot-body").appendChild(botResponse);
+
+                    // Scroll to bottom of chat
+                    document.getElementById("chatbot-body").scrollTop = document.getElementById("chatbot-body").scrollHeight;
+                })
+                .catch(error => console.error("Error:", error));
+            }
         }
-    });
+    </script>
 
-    function sendMessage() {
-        const input = document.getElementById("chatbot-input");
-        const message = input.value.trim();
+    <!-- Llama Reaction Animation -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            document.getElementById("upload-form").addEventListener("submit", function(event) {
+                event.preventDefault();
+                const reactionContainer = document.getElementById("llama-reactions");
 
-        if (message !== "") {
-            // Add user message to chat
-            const userMessage = document.createElement("div");
-            userMessage.classList.add("chatbot-message", "chatbot-user");
-            userMessage.innerHTML = `<p>${message}</p>`;
-            document.getElementById("chatbot-body").appendChild(userMessage);
+                console.log("Form submitted, starting animation");
 
-            // Clear input field
-            input.value = "";
+                for (let i = 0; i < 10; i++) {  // Create 10 llamas
+                    const llama = document.createElement("div");
+                    llama.textContent = "🦙";
+                    llama.classList.add("llama");
+                    llama.style.left = Math.random() * 100 + "%";
+                    llama.style.bottom = Math.random() * 100 + "%";
+                    llama.style.position = "absolute";
 
-            // Send user input to Django backend
-            fetch("{% url 'chatty' %}", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "X-CSRFToken": "{{ csrf_token }}"
-                },
-                body: JSON.stringify({ message: message })
-            })
-            .then(response => response.json())
-            .then(data => {
-                // Append chatbot response to chat
-                const botResponse = document.createElement("div");
-                botResponse.classList.add("chatbot-message", "chatbot-response");
-                botResponse.innerHTML = `<p>${data.response}</p>`;
-                document.getElementById("chatbot-body").appendChild(botResponse);
+                    reactionContainer.appendChild(llama);
 
-                // Scroll to bottom of chat
-                document.getElementById("chatbot-body").scrollTop = document.getElementById("chatbot-body").scrollHeight;
-            })
-            .catch(error => console.error("Error:", error));
-        }
-    }
-</script>
+                    setTimeout(() => {
+                        llama.style.transform = "translateY(-150px)"; // Float higher
+                    }, 50);
 
-<!-- Llama Reaction Animation -->
-<style>
-    .llama {
-        position: absolute;
-        font-size: 3rem;
-        opacity: 1;
-        transform: translateY(0);
-        transition: transform 5s ease-out, opacity 5s ease-out;
-    }
-</style>
+                    setTimeout(() => {
+                        llama.style.opacity = "0"; // Fade out
+                    }, 1500);
 
-<script>
-    document.getElementById("upload-form").addEventListener("submit", function(event) {
-        event.preventDefault();
-        const reactionContainer = document.getElementById("llama-reactions");
+                    setTimeout(() => {
+                        llama.remove(); // Remove llama from DOM
+                    }, 2500);
+                }
 
-        for (let i = 0; i < 10; i++) {  // Increased number of llamas
-            const llama = document.createElement("div");
-            llama.textContent = "🦙";
-            llama.classList.add("llama");
-            llama.style.left = Math.random() * 100 + "%";
-            llama.style.right = Math.random() * 100 + "%";
-            llama.style.bottom = "-100"; // Start from the bottom
-            llama.style.position = "absolute";
+                console.log("Llamas created, starting animation");
 
-            reactionContainer.appendChild(llama);
-
-            setTimeout(() => {
-                llama.style.transform = "translateY(-150px)"; // Float higher
-            }, 50);
-
-            setTimeout(() => llama.style.opacity = "0", 1500); // Stay visible longer before fading
-
-            setTimeout(() => llama.remove(), 2500);
-        }
-
-        setTimeout(() => event.target.submit(), 2600); // Delay form submission
-    });
-</script>
-
-{% endblock %}
+                setTimeout(() => {
+                    console.log("Form submission delayed");
+                    event.target.submit(); // Submit form after animation
+                }, 3000); // Delay form submission
+            });
+        });
+    </script>
+</div>
+{% endblock %}
