@@ -18,33 +18,44 @@ def determine_and_call_analytics(query: str, master_dict: dict):
     metric_funcs = available_functions_from_metrics(master_dict)
     print("sucess1!")
     metric_funcs_list = metric_funcs.keys()
-    metrics_input = f"""Based on the user query: '{query}' and the list of metric functions that can possibly be computed: {metric_funcs_list}, find the metric function needed 
-    to address the user's request. If the user's request can be addressed, return the metric function in the same format as the list. Else return NO."""
+    metrics_input = f"""Based on the user query: '{query}' and the list of metric functions: {metric_funcs_list}, determine which metric function should be used. 
+    If the user's request can be addressed, ONLY return the function name exactly as it appears in the list. If it cannot be addressed, return NO.
+    Please enclose any reasoning (chain-of-thought) within <think> and </think> tags, and then on a new line after </think> output ONLY the function name or NO.
+    """
 
     metrics_template = """
     Human: {text}
-    Assistant: ONLY return the metric function in the same format or NO 
+    Assistant: ONLY return the function name exactly as it appears in the list.
     """
 
+    # Create a prompt template that expects the final answer on the line after </think>
     metrics_prompt = PromptTemplate(
         template=metrics_template,
         input_variables=["text"]
     )
 
-    #memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
-
     qa1 = LLMChain(llm=llm, prompt=metrics_prompt)
     result1 = qa1.generate([{"text": metrics_input}])
-    output = result1.generations[0][0].text
+    output = result1.generations[0][0].text.strip()
+
+    # If the output includes chain-of-thought tags, extract the part after </think>
     if "</think>" in output:
-        after_think = output.split("</think>")[1].strip()  # Split and take the part after </think>
+        final_output = output.split("</think>")[-1].strip()
     else:
-        after_think = "" 
-    output = after_think
-    if after_think in metric_funcs:
+        final_output = output.strip()
+
+    print(f"Final output: {final_output}")
+    final_output = extract_final_function_name(final_output, metric_funcs_list)
+    
+    print("final_output", final_output)
+    if final_output in metric_funcs:
+        print("I am gonna cum")
+        # proceed with using final_output as the function name
+
         output = "Sure thing, I'll be generating your plots based on your shared files!"
-        data = pd.read_json('media/uploads/' + metric_funcs[output])
-        calc_func_output = FUNCTIONS[output](data)
+        data = pd.read_json('media/uploads/' + metric_funcs[final_output][0])
+        calc_func_output = FUNCTIONS[final_output](data)
+        print(calc_func_output)
         output = "\nDone!"
 
     elif "NO" in output:
@@ -100,3 +111,15 @@ def available_functions_from_metrics(available_metrics):
                     values.append(metric_value)
             available[func_name] = values
     return available
+
+def extract_final_function_name(llm_output: str, metric_funcs: list) -> str:
+    """
+    Extracts the final non-empty line from the LLM output and returns it
+    if it matches one of the known metric functions.
+    """
+    # Split the output into lines and iterate backwards.
+    lines = [line.strip() for line in llm_output.strip().splitlines() if line.strip()]
+    for line in reversed(lines):
+        if line in metric_funcs:
+            return line
+    return None
