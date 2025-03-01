@@ -23,26 +23,27 @@ master_dict = {
 analyzed_files = []
 
 def run_llm(query: str, user):
-    metrics_input = f"""You are a robust and well trained business advisor for business owners.
-                    Analyze the user query: '{query}'. If the query is asking you to generate/create any form of content, return
-                    the word PLOT only. Else respond with an appropriate response based on your business advising expertise."""
-
+    # Revised metrics prompt that includes the actual user query.
     metrics_template = """
-    Human: {text}
-    Assistant: ONLY return the word PLOT if the user is asking you to generate/create any form of content or return a generic response based on your business advising expertise. 
-    """
-
+    You are a business assistant. Based solely on the user's query, decide whether the user intends to generate plots/reports or requires general business advice.
+    
+    If the user's query indicates that they want to generate visual plots, reports, or similar business content, respond with only the word "PLOT".
+    Otherwise, provide an appropriate business advisory response.
+    
+    User Query: {text}
+    
+    Your Response:"""
+    
     metrics_prompt = PromptTemplate(
         template=metrics_template,
         input_variables=["text"]
     )
-
-    #memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
-
+    
     qa1 = LLMChain(llm=llm, prompt=metrics_prompt)
-    result1 = qa1.generate([{"text": metrics_input}])
-    output = result1.generations[0][0].text
+    result1 = qa1.generate([{"text": query}])
+    output = result1.generations[0][0].text.strip()
     print(f"Output: {output}")
+    
     if output == "PLOT":
         # Iterate through the user's files
         for f in user.files.all():
