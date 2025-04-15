@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Turbo{% endblock %}</title>
+    <title>{% block title %}AnPravic{% endblock %}</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body>
@@ -16,8 +16,8 @@
                     <!-- Logo -->
                     <div class="flex-shrink-0 flex items-center">
                         <a href="{% url 'home' %}" class="flex items-center space-x-2">
-                            <img src="{% static 'images/llama-whitebg.jpg' %}" alt="Turbo Logo" class="h-10 w-10 rounded-full"/>
-                            <span class="text-xl font-bold text-indigo-600">Turbo</span>
+                            {% comment %} <img src="{% static 'images/llama-whitebg.jpg' %}" alt="Turbo Logo" class="h-10 w-10 rounded-full"/> {% endcomment %}
+                            <span class="text-xl font-bold text-indigo-600">AnPravic</span>
                         </a>                        
                     </div>
                     
@@ -89,12 +89,12 @@
     {% block content %}{% endblock %}
 
     <!-- Footer -->
-    <footer class="bg-white border-t mt-12">
+    {% comment %} <footer class="bg-white border-t mt-12">
         <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
             <p class="text-center text-gray-500 text-sm">
                 © 2024 YourApp. All rights reserved to Ishaan.
             </p>
         </div>
-    </footer>
+    </footer> {% endcomment %}
 </body>
 </html>
