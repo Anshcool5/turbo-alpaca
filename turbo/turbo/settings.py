@@ -30,8 +30,14 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["localhost", "127.0.0.1", "[2605:fd00:4:1001:f816:3eff:fe9f:fd59]", "turbo-alpaca.duckdns.org"]
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
 
+ALLOWED_HOSTS = ["localhost", 
+                 "127.0.0.1", 
+                 "[2605:fd00:4:1001:f816:3eff:fe9f:fd59]", 
+                 "turbo-alpaca.duckdns.org"
+                 ]
 
 # Application definition
 
@@ -145,3 +151,7 @@ MEDIA_URL = "/media/"
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 # settings.py
 X_FRAME_OPTIONS = "SAMEORIGIN"
+
+CSRF_TRUSTED_ORIGINS = [
+    "https://turbo-alpaca.duckdns.org",
+]
