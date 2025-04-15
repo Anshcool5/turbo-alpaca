@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from django.http import JsonResponse, HttpResponse
+from django.http import JsonResponse, HttpResponse, FileResponse
 from PyPDF2 import PdfReader
 from langchain.text_splitter import CharacterTextSplitter
 from langchain.embeddings import HuggingFaceEmbeddings
@@ -441,7 +441,7 @@ def chatbot_view(request):
             
             #print("user_message", user_message)
             if user_message:
-                response = run_llm(user_message, request.user)
+                response = run_llm(user_message, request)
                 return JsonResponse({"response": response})
             else:
                 return JsonResponse({"response": "Please enter a valid question."})
@@ -508,6 +508,12 @@ def dashboard(request):
     }
     return render(request, "upload/dashboard.html", context)
 
+def download_csv(request, filename):
+    file_path = os.path.join(settings.MEDIA_ROOT, 'csv_for_upload', filename)
+    if os.path.exists(file_path):
+        response = FileResponse(open(file_path, 'rb'), as_attachment=True, filename=filename)
+        return response
+    return JsonResponse({"error": "File not found"}, status=404)
 
 # def dashboard(request):
 #     # Load your data (adjust the path as needed)
