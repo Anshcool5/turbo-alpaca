@@ -5,7 +5,7 @@ from langchain.chains import LLMChain
 from langchain.prompts import PromptTemplate
 from .get_keys_from_json import analyze_keys
 from .perform_analysis import determine_and_call_analytics
-from .competition_analysis import get_search_query_from_llm, run_playwright
+from .competition_analysis import get_search_query_from_llm, run_playwright, html_2_csv
 #from ...explain_plot import 
 
 load_dotenv()
@@ -23,7 +23,8 @@ master_dict = {
 
 analyzed_files = []
 
-def run_llm(query: str, user):
+def run_llm(query: str, request):
+    user = request.user
     # Revised metrics prompt that includes the actual user query.
     metrics_template = """
     You are a business assistant. Based solely on the user's query, decide whether the user intends to generate plots/reports, requires general business advice or wants to analyze the competition.
@@ -59,10 +60,14 @@ def run_llm(query: str, user):
                 if key in master_dict and not master_dict[key]:
                     master_dict[key].append(f.file_name)
                     master_dict[key].append(val)
-        output = determine_and_call_analytics(query, master_dict)     
+        output = determine_and_call_analytics(query, master_dict)  
+
     elif output == "ANALYZE":
         search_query = get_search_query_from_llm(query)
-        run_playwright(search_query)
-        # TO-DO convert html to csv
+        parsed_html = run_playwright(search_query)
+        html_2_csv(parsed_html)
+        download_url = request.build_absolute_uri(f"/download_csv/competition_analysis.csv")
+        output = f'✅ Analysis complete. <a href="{download_url}" target="_blank" style="color:blue;">Click here to download CSV</a>'
+
         # Plot csv and give insights?
     return output
