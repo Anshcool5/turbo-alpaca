@@ -63,9 +63,9 @@ def run_llm(query: str, request):
         output = determine_and_call_analytics(query, master_dict)  
 
     elif output == "ANALYZE":
-        #search_query = get_search_query_from_llm(query)
-        #parsed_html = run_playwright(search_query)
-        #html_2_csv(parsed_html)
+        search_query = get_search_query_from_llm(query)
+        parsed_html = run_playwright(search_query)
+        html_2_csv(parsed_html)
         download_url = request.build_absolute_uri(f"/download_csv/competition_analysis.csv")
         output = f'✅ Analysis complete. <a href="{download_url}" target="_blank" style="color:blue;">Click here to download CSV</a>'
 
