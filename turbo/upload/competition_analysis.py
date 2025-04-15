@@ -42,7 +42,7 @@ def run_playwright(search_query):
     base_url = 'https://maps.google.com'
 
     playwright = sync_playwright().start()
-    browser = playwright.chromium.launch(headless=False)
+    browser = playwright.chromium.launch(headless=True)
     context = browser.new_context(java_script_enabled=True)
     page = context.new_page()
     page.goto(base_url, wait_until='load')
