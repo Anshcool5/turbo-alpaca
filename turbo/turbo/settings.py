@@ -30,7 +30,7 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["localhost", "127.0.0.1", "[2605:fd00:4:1001:f816:3eff:fe9f:fd59]"]
+ALLOWED_HOSTS = ["localhost", "127.0.0.1", "[2605:fd00:4:1001:f816:3eff:fe9f:fd59]", "turbo-alpaca.duckdns.org"]
 
 
 # Application definition
