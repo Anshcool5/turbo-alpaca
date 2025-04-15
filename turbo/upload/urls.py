@@ -40,6 +40,8 @@ urlpatterns = [
     path('process_data/', views.process_idea, name='process_data'),
 
     #chatbot
+
+    path('download_csv/<str:filename>/', views.download_csv, name='download_csv')
 ]
 
 if settings.DEBUG:
