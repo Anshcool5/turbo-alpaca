@@ -1,4 +1,89 @@
+
 {% extends 'upload/base.html' %}
+{% load static %}
+
+{% block title %}Evaluate Metrics{% endblock %}
+
+{% block content %}
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-10">
+        <div class="bg-white rounded-lg shadow-lg p-10 max-w-3xl mx-auto relative">
+            <h1 class="text-4xl font-bold text-blue-600 text-center mb-6">Here is a thorough analysis of your idea</h1>
+            <div id="pentagon-container" class="relative w-72 h-72 mx-auto border-2 border-gray-300 rounded-lg flex items-center justify-center">
+                <!-- Normal Pentagon SVG -->
+                <svg id="metric-svg" width="300" height="300" viewBox="0 0 300 300" class="absolute">
+                    <polygon id="metricPolygon" points="150,50 220,130 190,220 110,220 80,130" fill="#e5e7eb" stroke="#4b5563" stroke-width="2" />
+                </svg>
+            </div>
+
+            <!-- Display the Descriptions Below the Image -->
+            <div class="mt-8">
+                <h2 class="text-2xl font-semibold text-blue-600 mb-4">Additional Insights</h2>
+                <div class="space-y-4">
+                    {% for item in descript %}
+                        <div class="bg-indigo-100 p-4 rounded-lg shadow-md">
+                            {% for key, value in item.items %}
+                                <div class="mb-2">
+                                    <span class="font-semibold text-indigo-600">{{ key }}:</span>
+                                    <span class="text-gray-800">{{ value }}</span>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% empty %}
+                        <p class="text-gray-500">No additional insights available at this time.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const metrics = {{ metrics|safe }};
+        const box = document.getElementById('pentagon-container').getBoundingClientRect();
+        const centerX = box.width / 2;
+        const centerY = box.height / 2;
+        const maxRadius = 100;
+        const angleStep = (2 * Math.PI) / Object.keys(metrics).length;
+
+        function updatePolygonPoints(metrics) {
+            let pointsArray = [];
+            let labels = [];
+
+            metrics.forEach((metric, i) => {
+                const key = Object.keys(metric)[0];
+                const value = metric[key];
+                
+                let radius = (parseInt(value) / 10) * maxRadius;
+                let angle = i * angleStep - Math.PI / 2;
+                let x = centerX + radius * Math.cos(angle);
+                let y = centerY + radius * Math.sin(angle);
+                pointsArray.push(`${x},${y}`);
+            
+                let labelX = x + (x > centerX ? 20 : -60);
+                let labelY = y + (y > centerY ? 10 : -20);
+            
+                labels.push({ x: labelX, y: labelY, text: `${key}: ${value}/10` });
+            });
+
+            document.getElementById('metricPolygon').setAttribute('points', pointsArray.join(' '));
+            document.querySelectorAll('.metric-label').forEach(el => el.remove());
+            
+            labels.forEach(label => {
+                let div = document.createElement('div');
+                div.className = 'metric-label absolute bg-white text-indigo-600 text-xs p-1 rounded border border-gray-300 shadow-sm';
+                div.style.transform = 'translate(-50%, -50%)';
+                div.style.position = 'absolute';
+                div.style.left = `${label.x + 10}px`;
+                div.style.top = `${label.y - 10}px`;
+                div.innerText = label.text;
+                document.getElementById('pentagon-container').appendChild(div);
+            });
+        }
+        updatePolygonPoints(metrics);
+    </script>
+{% endblock %}
+
+
+{% comment %} {% extends 'upload/base.html' %}
 {% load static %}
 
 {% block title %}Evaluate Metrics{% endblock %}
@@ -84,4 +169,4 @@
         }
         updatePolygonPoints(metrics);
     </script>
-{% endblock %}
+{% endblock %} {% endcomment %}
